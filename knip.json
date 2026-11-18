@@ -1,7 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@5/overview/config-schema.json",
   "entry": ["tests/**/*.{ts,tsx}"],
-  "project": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}"],
+  "project": ["src/**/*.{ts,tsx,css}", "tests/**/*.{ts,tsx}"],
   "ignoreDependencies": [
     "zod",
     "zustand",
