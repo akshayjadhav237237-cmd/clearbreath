@@ -3,7 +3,7 @@
  * Enforces zero floating-point leakage across domain layer boundaries.
  */
 
-/** Converts any floating-point number to a bounded integer. */
+/** Converts a floating-point number to a bounded integer. */
 export function toInteger(value: number): number {
   return Math.round(value);
 }
