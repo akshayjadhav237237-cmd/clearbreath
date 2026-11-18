@@ -1,0 +1,12 @@
+{
+  "$schema": "https://unpkg.com/knip@5/overview/config-schema.json",
+  "entry": ["tests/**/*.{ts,tsx}"],
+  "project": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}"],
+  "ignoreDependencies": [
+    "zod",
+    "zustand",
+    "@testing-library/jest-dom",
+    "@testing-library/user-event",
+    "axe-core"
+  ]
+}
