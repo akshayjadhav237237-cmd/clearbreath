@@ -62,3 +62,17 @@ This document records the foundational engineering assumptions for the Clearbrea
 
 - Action impact quantification aggregates daily inhaled dose reduction across household members.
 - Commute modal shift emissions use standard vehicle emission factors from CPCB and DMRC corporate sustainability reports.
+
+## AI Layer Assumptions
+
+### Zero-PII Egress and Context Anonymization
+
+- To safeguard household privacy, exact user names, street addresses, precise financial budgets, and room dimensions are never transmitted to cloud LLM endpoints.
+- AI context (`LlmSafeContext`) is limited to coarse categorical fields (city, housing type, sealing class, age categories present, commute mode, budget tier) and verified numeric facts derived from pure domain calculations.
+- API keys are held strictly in memory during an active browser session (`ApiKeyHolder`) and are never written to disk, cookies, or localStorage.
+
+### Grounding and Hallucination Mitigation
+
+- Cloud LLM outputs are treated as untrusted and must pass JSON schema parsing and strict numerical grounding verification before presentation.
+- Any numeric claim in generated narratives must match an allowed numeric fact emitted by domain calculations. Unverified numbers trigger fallback to deterministic local templates.
+- If external inference is unavailable, rate-limited, rejected, or unconsented by the user, the assistant falls back transparently to deterministic offline templates (`LocalProvider`).
