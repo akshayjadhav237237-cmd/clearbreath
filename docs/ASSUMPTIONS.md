@@ -26,3 +26,8 @@ This document records the foundational engineering assumptions for the Clearbrea
 
 - Gemini API key expected via environment or client configuration in later development steps.
 - Deterministic fake adapters are used for local testing and CI verification without requiring live external API credentials.
+
+## Target Persona
+
+- Default persona is a multi-generational family household in Delhi-NCR during winter smog (parent, child, older adult).
+- The default persona definition lives in `src/config/persona.ts` as the constant `DEFAULT_HOUSEHOLD_PERSONA`.
