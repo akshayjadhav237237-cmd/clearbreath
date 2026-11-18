@@ -1,5 +1,19 @@
 export type { Ok, Err, Result } from './result';
 export { ok, err, isOk, isErr, mapResult, flatMapResult } from './result';
-export type { Clock, IdGenerator } from './ports';
+export type {
+  Clock,
+  FetchPort,
+  IdGenerator,
+  RandomPort,
+  SleepPort,
+  StoragePort,
+} from './ports';
 export { CLOCK_PORT, ID_GENERATOR_PORT } from './ports';
-export { SystemClock, SystemIdGenerator } from './system-ports';
+export {
+  MemoryStoragePort,
+  SystemClock,
+  SystemFetchPort,
+  SystemIdGenerator,
+  SystemRandomPort,
+  SystemSleepPort,
+} from './system-ports';

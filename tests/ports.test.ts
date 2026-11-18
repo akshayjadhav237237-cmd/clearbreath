@@ -1,10 +1,21 @@
 import { describe, it, expect } from 'vitest';
-import type { Clock, IdGenerator } from '../src/shared';
+import type {
+  Clock,
+  FetchPort,
+  IdGenerator,
+  RandomPort,
+  SleepPort,
+  StoragePort,
+} from '../src/shared';
 import {
   CLOCK_PORT,
   ID_GENERATOR_PORT,
+  MemoryStoragePort,
   SystemClock,
+  SystemFetchPort,
   SystemIdGenerator,
+  SystemRandomPort,
+  SystemSleepPort,
 } from '../src/shared';
 
 /** Test double for Clock interface allowing controlled time advancement. */
@@ -74,5 +85,44 @@ describe('Fake test doubles', () => {
     const fake = new FakeIdGenerator();
     expect(fake.next()).toBe('test-id-1');
     expect(fake.next()).toBe('test-id-2');
+  });
+});
+
+describe('System ports extensions', () => {
+  it('exercises MemoryStoragePort operations', () => {
+    const storage = new MemoryStoragePort();
+    expect(storage.getItem('key')).toBeNull();
+    storage.setItem('key', 'val');
+    expect(storage.getItem('key')).toBe('val');
+    storage.removeItem('key');
+    expect(storage.getItem('key')).toBeNull();
+  });
+
+  it('exercises SystemRandomPort output range', () => {
+    const rand = new SystemRandomPort();
+    const val = rand.random();
+    expect(val).toBeGreaterThanOrEqual(0);
+    expect(val).toBeLessThan(1);
+  });
+
+  it('exercises SystemSleepPort timeout and abort', async () => {
+    const sleep = new SystemSleepPort();
+    await sleep.sleep(5);
+    const controller = new AbortController();
+    controller.abort(new Error('Pre-aborted'));
+    await expect(sleep.sleep(100, controller.signal)).rejects.toThrow(
+      'Pre-aborted'
+    );
+  });
+
+  it('validates SystemFetchPort and type interfaces', () => {
+    const fetcher: FetchPort = new SystemFetchPort();
+    expect(typeof fetcher.fetch).toBe('function');
+    const sleep: SleepPort = new SystemSleepPort();
+    expect(typeof sleep.sleep).toBe('function');
+    const storage: StoragePort = new MemoryStoragePort();
+    expect(typeof storage.getItem).toBe('function');
+    const rand: RandomPort = new SystemRandomPort();
+    expect(typeof rand.random).toBe('function');
   });
 });
