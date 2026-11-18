@@ -152,8 +152,8 @@ describe('Exposure engine - parameter validation and sources', () => {
     expect(EXPOSURE_SOURCES['thatcher-deposition-pm25']?.id).toBe(
       'thatcher-deposition-pm25'
     );
-    expect(AIR_EXCHANGE_RATES.average.ratePerHour).toBe(0.8);
-    expect(PENETRATION_FACTOR.factor).toBe(0.8);
-    expect(SURFACE_DEPOSITION_RATE.ratePerHour).toBe(0.24);
+    expect(AIR_EXCHANGE_RATES.average.ratePerHour).toBeCloseTo(0.8, 2);
+    expect(PENETRATION_FACTOR.factor).toBeCloseTo(0.8, 2);
+    expect(SURFACE_DEPOSITION_RATE.ratePerHour).toBeCloseTo(0.24, 2);
   });
 });

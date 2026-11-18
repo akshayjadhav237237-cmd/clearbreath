@@ -11,6 +11,9 @@ import {
   ACTION_SOURCES,
   ACTION_SOURCES_MAP,
   COMMUTE_EMISSION_FACTORS,
+  SOURCE_ARAI,
+  SOURCE_DMRC,
+  SOURCE_EMISSIONS_INVENTORY,
   calculateCommuteEmissionsGrams,
   calculateModalShiftSavingsGrams,
   getActionById,
@@ -93,6 +96,7 @@ describe('Domain Actions Catalog attributes and sources', () => {
     }
     expect(getActionSourceById('cpcb-emissions-inventory')).toBeDefined();
     expect(getActionSourceById('unknown-source-id')).toBeUndefined();
+    expect(SOURCE_ARAI).toBe('cpcb-arai-vehicular-emissions-2020');
     expect(ACTION_SOURCES_MAP.size).toBe(ACTION_SOURCES.length);
   });
 });
@@ -103,13 +107,13 @@ describe('Domain Actions transit emissions and file limits', () => {
       CommuteMode,
       { co2e: number; source: string }
     > = {
-      walk: { co2e: 0, source: 'cpcb-emissions-inventory' },
-      cycle: { co2e: 0, source: 'cpcb-emissions-inventory' },
-      metro: { co2e: 18, source: 'dmrc-sustainability-report-2023' },
-      bus: { co2e: 45, source: 'cpcb-emissions-inventory' },
-      twoWheeler: { co2e: 75, source: 'cpcb-emissions-inventory' },
-      autoRickshaw: { co2e: 60, source: 'cpcb-emissions-inventory' },
-      car: { co2e: 140, source: 'cpcb-emissions-inventory' },
+      walk: { co2e: 0, source: SOURCE_EMISSIONS_INVENTORY },
+      cycle: { co2e: 0, source: SOURCE_EMISSIONS_INVENTORY },
+      metro: { co2e: 18, source: SOURCE_DMRC },
+      bus: { co2e: 45, source: SOURCE_EMISSIONS_INVENTORY },
+      twoWheeler: { co2e: 75, source: SOURCE_EMISSIONS_INVENTORY },
+      autoRickshaw: { co2e: 60, source: SOURCE_EMISSIONS_INVENTORY },
+      car: { co2e: 140, source: SOURCE_EMISSIONS_INVENTORY },
     };
 
     for (const [mode, meta] of Object.entries(expectedFactors)) {

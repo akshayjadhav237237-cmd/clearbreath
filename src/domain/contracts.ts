@@ -126,7 +126,7 @@ export interface Explanation {
 export interface DomainError {
   readonly code: string;
   readonly message: string;
-  readonly details?: Record<string, unknown> | undefined;
+  readonly details?: Record<string, unknown>;
 }
 
 /** Population sensitivity classification for tailored smog advisories. */

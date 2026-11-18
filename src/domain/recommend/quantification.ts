@@ -24,30 +24,45 @@ export function aqiToPm25(aqi: number): number {
   return toInteger(250 + ((aqi - 400) / 100) * 100);
 }
 
+interface ExposureContext {
+  readonly indoorPm25: number;
+  readonly outdoorMins: number;
+  readonly commuteMins: number;
+  readonly indoorMins: number;
+}
+
+/** Resolves indoor concentrations and daily minute distributions for exposure modeling. */
+function resolveExposureContext(
+  profile: HouseholdProfile,
+  outdoorPm25: number
+): ExposureContext {
+  const indoorRes = calculateIndoorPm25(outdoorPm25, profile.home, false);
+  const indoorPm25 = indoorRes.ok
+    ? indoorRes.value
+    : toInteger(outdoorPm25 * 0.7);
+  const outdoorMins = profile.lifestyle.outdoorMinutesPerDay;
+  const commuteMins = profile.lifestyle.commute.minutes * 2;
+  const indoorMins = Math.max(0, MINUTES_PER_DAY - (outdoorMins + commuteMins));
+  return { indoorPm25, outdoorMins, commuteMins, indoorMins };
+}
+
 /** Computes estimated baseline daily inhaled dose in integer ug across household members. */
 export function calculateHouseholdBaselineDose(
   profile: HouseholdProfile,
   outdoorPm25: number
 ): number {
-  const indoorRes = calculateIndoorPm25(outdoorPm25, profile.home, false);
-  const indoorPm25 = indoorRes.ok
-    ? indoorRes.value
-    : toInteger(outdoorPm25 * 0.7);
-
-  const outdoorMins = profile.lifestyle.outdoorMinutesPerDay;
-  const commuteMins = profile.lifestyle.commute.minutes * 2;
-  const indoorMins = Math.max(0, MINUTES_PER_DAY - (outdoorMins + commuteMins));
+  const ctx = resolveExposureContext(profile, outdoorPm25);
 
   let totalDose = 0;
   for (const member of profile.members) {
     const inDose = calculateInhaledDose(
-      indoorPm25,
-      indoorMins,
+      ctx.indoorPm25,
+      ctx.indoorMins,
       member.ageGroup
     );
     const outDose = calculateInhaledDose(
       outdoorPm25,
-      outdoorMins + commuteMins,
+      ctx.outdoorMins + ctx.commuteMins,
       member.ageGroup
     );
     if (inDose.ok) totalDose += inDose.value;
@@ -102,14 +117,7 @@ export function calculateActionDoseReduction(
   outdoorPm25: number,
   baselineDose: number
 ): number {
-  const indoorRes = calculateIndoorPm25(outdoorPm25, profile.home, false);
-  const indoorPm25 = indoorRes.ok
-    ? indoorRes.value
-    : toInteger(outdoorPm25 * 0.7);
-
-  const outdoorMins = profile.lifestyle.outdoorMinutesPerDay;
-  const commuteMins = profile.lifestyle.commute.minutes * 2;
-  const indoorMins = Math.max(0, MINUTES_PER_DAY - (outdoorMins + commuteMins));
+  const ctx = resolveExposureContext(profile, outdoorPm25);
 
   let savedDose = 0;
   for (const effect of action.effects) {
@@ -117,15 +125,15 @@ export function calculateActionDoseReduction(
       savedDose += calculateIndoorEffectReduction(
         effect,
         profile,
-        indoorPm25,
-        indoorMins
+        ctx.indoorPm25,
+        ctx.indoorMins
       );
     } else if (effect.type === 'exposureReduction') {
       savedDose += calculateExposureEffectReduction(
         effect,
         profile,
         outdoorPm25,
-        outdoorMins + commuteMins
+        ctx.outdoorMins + ctx.commuteMins
       );
     }
   }

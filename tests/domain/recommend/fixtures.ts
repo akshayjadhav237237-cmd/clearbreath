@@ -1,5 +1,7 @@
 import type { Action, DailyPlan } from '../../../src/domain/contracts';
 
+const SOURCE_ASHRAE = 'ashrae-62-2-residential';
+
 /** Sample curated particulate mitigation action catalog for test suites. */
 export const TEST_ACTION_CATALOG: readonly Action[] = [
   {
@@ -16,7 +18,7 @@ export const TEST_ACTION_CATALOG: readonly Action[] = [
         reductionBasisPoints: 6500,
       },
     ],
-    sourceIds: ['ashrae-62-2-residential', 'epa-indoor-pm-penetration'],
+    sourceIds: [SOURCE_ASHRAE, 'epa-indoor-pm-penetration'],
     confidence: 'high',
   },
   {
@@ -51,7 +53,7 @@ export const TEST_ACTION_CATALOG: readonly Action[] = [
         reductionBasisPoints: 3000,
       },
     ],
-    sourceIds: ['ashrae-62-2-residential'],
+    sourceIds: [SOURCE_ASHRAE],
     confidence: 'medium',
   },
   {
@@ -68,7 +70,7 @@ export const TEST_ACTION_CATALOG: readonly Action[] = [
         reductionBasisPoints: 2000,
       },
     ],
-    sourceIds: ['ashrae-62-2-residential'],
+    sourceIds: [SOURCE_ASHRAE],
     confidence: 'medium',
   },
   {
@@ -128,7 +130,7 @@ export const TEST_ACTION_CATALOG: readonly Action[] = [
         reductionBasisPoints: 9000,
       },
     ],
-    sourceIds: ['ashrae-62-2-residential'],
+    sourceIds: [SOURCE_ASHRAE],
     confidence: 'high',
   },
 ];

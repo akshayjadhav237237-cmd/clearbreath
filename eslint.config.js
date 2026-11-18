@@ -1,6 +1,13 @@
 import js from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import globals from 'globals';
+import sonarjs from 'eslint-plugin-sonarjs';
+import jsxA11y from 'eslint-plugin-jsx-a11y';
+import reactHooks from 'eslint-plugin-react-hooks';
+import importX from 'eslint-plugin-import-x';
+
+const PATTERN_FEATURES = '**/features/**';
+const PATTERN_APP = '**/app/**';
 
 export default tseslint.config(
   {
@@ -8,6 +15,17 @@ export default tseslint.config(
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  sonarjs.configs.recommended,
+  jsxA11y.flatConfigs.recommended,
+  reactHooks.configs.flat.recommended,
+  {
+    plugins: {
+      'import-x': importX,
+    },
+    rules: {
+      'import-x/no-cycle': 'error',
+    },
+  },
   {
     languageOptions: {
       globals: {
@@ -36,6 +54,14 @@ export default tseslint.config(
       eqeqeq: ['error', 'always'],
       'no-var': 'error',
       'prefer-const': 'error',
+      'no-eval': 'error',
+      'no-implied-eval': 'error',
+      'no-new-func': 'error',
+      'sonarjs/cognitive-complexity': ['error', 10],
+      'sonarjs/no-duplicate-string': 'error',
+      'sonarjs/no-identical-functions': 'error',
+      'import-x/no-cycle': 'error',
+      'import-x/no-named-as-default': 'off',
     },
   },
   {
@@ -55,7 +81,11 @@ export default tseslint.config(
         {
           selector: 'ExportDefaultDeclaration',
           message:
-            'ExportDefaultDeclaration is forbidden in src; use named exports.',
+            'ExportDefaultDeclaration forbidden in src; use named exports.',
+        },
+        {
+          selector: 'JSXAttribute[name.name="dangerouslySetInnerHTML"]',
+          message: 'dangerouslySetInnerHTML is forbidden.',
         },
       ],
     },
@@ -66,12 +96,9 @@ export default tseslint.config(
       'no-restricted-globals': [
         'error',
         { name: 'window', message: 'Domain layer cannot access window' },
-        { name: 'document', message: 'Domain layer cannot access document' },
-        { name: 'fetch', message: 'Domain layer cannot access fetch' },
-        {
-          name: 'localStorage',
-          message: 'Domain layer cannot access localStorage',
-        },
+        { name: 'document', message: 'Domain forbidden document' },
+        { name: 'fetch', message: 'Domain forbidden fetch' },
+        { name: 'localStorage', message: 'Domain forbidden storage' },
       ],
       'no-restricted-imports': [
         'error',
@@ -82,9 +109,9 @@ export default tseslint.config(
                 'react',
                 'react-dom',
                 'zustand',
-                '**/features/**',
+                PATTERN_FEATURES,
                 '**/ai/**',
-                '**/app/**',
+                PATTERN_APP,
               ],
               message: 'Domain layer cannot import UI or framework modules',
             },
@@ -105,7 +132,7 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: ['**/features/**', '!./**'],
+              group: [PATTERN_FEATURES, '!./**'],
               message: 'Features cannot import other features',
             },
           ],
@@ -123,9 +150,9 @@ export default tseslint.config(
             {
               group: [
                 '**/domain/**',
-                '**/features/**',
+                PATTERN_FEATURES,
                 '**/ai/**',
-                '**/app/**',
+                PATTERN_APP,
               ],
               message: 'Shared layer cannot import higher layers',
             },
@@ -143,8 +170,8 @@ export default tseslint.config(
           patterns: [
             {
               group: [
-                '**/features/**',
-                '**/app/**',
+                PATTERN_FEATURES,
+                PATTERN_APP,
                 'react',
                 'react-dom',
                 'zustand',

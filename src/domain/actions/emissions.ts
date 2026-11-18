@@ -1,4 +1,5 @@
 import type { CommuteMode } from '../contracts';
+import { SOURCE_DMRC, SOURCE_EMISSIONS_INVENTORY } from './sources';
 
 /** Transit mode carbon intensity metadata in integer grams CO2e per passenger-km. */
 export interface TransitEmissionFactor {
@@ -14,37 +15,37 @@ export const COMMUTE_EMISSION_FACTORS: Readonly<
   walk: {
     mode: 'walk',
     co2eGramsPerKm: 0,
-    sourceId: 'cpcb-emissions-inventory',
+    sourceId: SOURCE_EMISSIONS_INVENTORY,
   },
   cycle: {
     mode: 'cycle',
     co2eGramsPerKm: 0,
-    sourceId: 'cpcb-emissions-inventory',
+    sourceId: SOURCE_EMISSIONS_INVENTORY,
   },
   metro: {
     mode: 'metro',
     co2eGramsPerKm: 18,
-    sourceId: 'dmrc-sustainability-report-2023',
+    sourceId: SOURCE_DMRC,
   },
   bus: {
     mode: 'bus',
     co2eGramsPerKm: 45,
-    sourceId: 'cpcb-emissions-inventory',
+    sourceId: SOURCE_EMISSIONS_INVENTORY,
   },
   twoWheeler: {
     mode: 'twoWheeler',
     co2eGramsPerKm: 75,
-    sourceId: 'cpcb-emissions-inventory',
+    sourceId: SOURCE_EMISSIONS_INVENTORY,
   },
   autoRickshaw: {
     mode: 'autoRickshaw',
     co2eGramsPerKm: 60,
-    sourceId: 'cpcb-emissions-inventory',
+    sourceId: SOURCE_EMISSIONS_INVENTORY,
   },
   car: {
     mode: 'car',
     co2eGramsPerKm: 140,
-    sourceId: 'cpcb-emissions-inventory',
+    sourceId: SOURCE_EMISSIONS_INVENTORY,
   },
 };
 

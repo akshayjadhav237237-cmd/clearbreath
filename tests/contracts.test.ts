@@ -68,7 +68,7 @@ describe('Profile and concentration contracts', () => {
 
     expect(conc.pm25).toBe(120);
     expect(aqi.dominant).toBe('pm25');
-    expect(profile.members.length).toBe(1);
+    expect(profile.members).toHaveLength(1);
     expect(profile.home.type).toBe('apartment');
   });
 });
@@ -107,7 +107,7 @@ describe('Action and reading contracts', () => {
     };
 
     expect(reading.hour).toBe(8);
-    expect(action.effects.length).toBe(3);
+    expect(action.effects).toHaveLength(3);
     expect(action.costRupees).toBe(2500);
   });
 });
@@ -135,9 +135,9 @@ describe('Diurnal plan and explanation contracts', () => {
 
     expect(explanation.result).toBe(42);
     expect(error.code).toBe('ERR_1');
-    expect(sens).toBe('high');
-    expect(plan.hourlyAqi.length).toBe(1);
-    expect(recs.decisionTrace.length).toBe(0);
+    expect(sens as string).toBe('high');
+    expect(plan.hourlyAqi).toHaveLength(1);
+    expect(recs.decisionTrace).toHaveLength(0);
   });
 });
 
@@ -148,25 +148,37 @@ describe('Engine function signatures', () => {
       category: 'veryPoor',
       dominant: 'pm25',
     };
-    const calcAqi: CalculateAqiFn = () => ({ ok: true, value: aqi });
-    const calcIndoor: CalculateIndoorPm25Fn = () => ({ ok: true, value: 35 });
-    const calcDose: CalculateInhaledDoseFn = () => ({ ok: true, value: 50 });
-    const genPlan: GenerateDailyPlanFn = () => ({
+    const calcAqi: CalculateAqiFn = (c) => ({
+      ok: true,
+      value: { ...aqi, value: c.pm25 + 300 },
+    });
+    const calcIndoor: CalculateIndoorPm25Fn = (c, h, p) => ({
+      ok: true,
+      value: c + (h ? 1 : 0) + (p ? 1 : 0),
+    });
+    const calcDose: CalculateInhaledDoseFn = (c, m, a) => ({
+      ok: true,
+      value: c + m + (a ? 1 : 0),
+    });
+    const genPlan: GenerateDailyPlanFn = (s, l, p) => ({
       ok: true,
       value: {
         outdoorWindows: [],
         bestVentilationWindow: null,
         purifierSchedule: [],
         hourlyAqi: [aqi],
-        advisorySummary: 'Safe',
+        advisorySummary: s.length + l.length + (p ? 'Safe' : ''),
       },
     });
-    const genRec: GenerateRecommendationsFn = () => ({
+    const genRec: GenerateRecommendationsFn = (p, a, h, c) => ({
       ok: true,
-      value: { items: [], decisionTrace: [] },
+      value: {
+        items: [],
+        decisionTrace: [p && h ? a.category + c.length : ''],
+      },
     });
-    const compChoices: CompareChoicesFn = () => ({
-      doseDeltaUg: 10,
+    const compChoices: CompareChoicesFn = (a, b) => ({
+      doseDeltaUg: a && b ? 10 : 0,
       emissionsDeltaGrams: 20,
       summary: 'delta',
     });

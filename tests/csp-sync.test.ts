@@ -14,7 +14,7 @@ describe('Configuration values', () => {
     expect(APP_NAME).toBe('Clearbreath');
     expect(GEMINI_MODEL_ID).toBe('gemini-1.5-flash');
     expect(STORAGE_KEYS.SETTINGS).toBe('clearbreath_settings_v1');
-    expect(DEFAULT_HOUSEHOLD_PERSONA.members.length).toBe(3);
+    expect(DEFAULT_HOUSEHOLD_PERSONA.members).toHaveLength(3);
   });
 });
 

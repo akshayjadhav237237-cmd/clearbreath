@@ -23,6 +23,19 @@ export function getAqiCategory(aqi: number): AqiCategory {
   return 'severe';
 }
 
+/** Helper to interpolate linearly within a breakpoint band. */
+function interpolateBand(
+  band: BreakpointBand,
+  conc: number,
+  cap: number
+): number {
+  const spanB = band.bHi - band.bLo;
+  if (spanB <= 0) return cap;
+  const slope = (band.iHi - band.iLo) / spanB;
+  const linear = slope * (conc - band.bLo) + band.iLo;
+  return clampInteger(toInteger(linear), band.iLo, cap);
+}
+
 /** Calculates pollutant sub-index using CPCB piecewise linear formula. */
 export function calculateSubIndex(
   concentration: number,
@@ -35,21 +48,12 @@ export function calculateSubIndex(
 
   for (const band of breakpoints) {
     if (concentration <= band.bHi) {
-      const spanB = band.bHi - band.bLo;
-      if (spanB <= 0) return band.iHi;
-      const slope = (band.iHi - band.iLo) / spanB;
-      const linear = slope * (concentration - band.bLo) + band.iLo;
-      return clampInteger(toInteger(linear), band.iLo, band.iHi);
+      return interpolateBand(band, concentration, band.iHi);
     }
   }
 
   const last = breakpoints[breakpoints.length - 1];
-  if (!last) return MAX_AQI;
-  const spanB = last.bHi - last.bLo;
-  if (spanB <= 0) return MAX_AQI;
-  const slope = (last.iHi - last.iLo) / spanB;
-  const linear = slope * (concentration - last.bLo) + last.iLo;
-  return clampInteger(toInteger(linear), last.iLo, MAX_AQI);
+  return last ? interpolateBand(last, concentration, MAX_AQI) : MAX_AQI;
 }
 
 /** Calculates India CPCB National AQI from PM2.5 and PM10 concentrations. */

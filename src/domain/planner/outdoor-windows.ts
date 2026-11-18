@@ -9,6 +9,36 @@ export interface OutdoorWindow {
   readonly averageAqi: number;
 }
 
+/** Computes average AQI for a candidate time window. */
+function computeWindowAvg(
+  hourlyAqi: readonly AqiResult[],
+  start: number,
+  length: number
+): number {
+  let sum = 0;
+  for (let h = start; h < start + length; h += 1) {
+    const reading = hourlyAqi[h];
+    if (reading !== undefined) {
+      sum += reading.value;
+    }
+  }
+  return toInteger(sum / length);
+}
+
+/** Determines whether a candidate outdoor window outperforms the current best window. */
+function isSuperiorWindow(
+  avg: number,
+  bestAqi: number,
+  start: number,
+  bestWindow: OutdoorWindow | null
+): boolean {
+  if (avg < bestAqi) return true;
+  if (avg === bestAqi && bestWindow !== null) {
+    return Math.abs(start - 13) < Math.abs(bestWindow.startHour - 13);
+  }
+  return false;
+}
+
 /** Finds the optimal continuous window for a given duration below the maximum AQI limit. */
 function findBestWindowForDuration(
   hourlyAqi: readonly AqiResult[],
@@ -19,29 +49,14 @@ function findBestWindowForDuration(
   let bestAqi = Number.POSITIVE_INFINITY;
 
   for (let start = 0; start <= 24 - length; start += 1) {
-    let sum = 0;
-    for (let h = start; h < start + length; h += 1) {
-      const reading = hourlyAqi[h];
-      if (reading !== undefined) {
-        sum += reading.value;
-      }
-    }
-    const avg = toInteger(sum / length);
-    if (avg <= maxAqi) {
-      const isBetter =
-        avg < bestAqi ||
-        (avg === bestAqi &&
-          bestWindow !== null &&
-          Math.abs(start - 13) < Math.abs(bestWindow.startHour - 13));
-
-      if (isBetter) {
-        bestAqi = avg;
-        bestWindow = {
-          startHour: start,
-          endHour: start + length,
-          averageAqi: avg,
-        };
-      }
+    const avg = computeWindowAvg(hourlyAqi, start, length);
+    if (avg <= maxAqi && isSuperiorWindow(avg, bestAqi, start, bestWindow)) {
+      bestAqi = avg;
+      bestWindow = {
+        startHour: start,
+        endHour: start + length,
+        averageAqi: avg,
+      };
     }
   }
 

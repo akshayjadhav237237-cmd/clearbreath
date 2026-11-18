@@ -19,6 +19,33 @@ const DEFAULT_CONTEXT: ComparisonContext = {
   },
 };
 
+/** Evaluates dose reduction from indoor particulate reduction effect. */
+function evaluateIndoorEffect(
+  effect: { reductionBasisPoints: number },
+  indoorPm25: number
+): number {
+  const factor = 1 - effect.reductionBasisPoints / 10000;
+  const mitigated = Math.max(0, toInteger(indoorPm25 * factor));
+  const base = calculateInhaledDose(indoorPm25, 1320, 'adult');
+  const next = calculateInhaledDose(mitigated, 1320, 'adult');
+  return base.ok && next.ok ? base.value - next.value : 0;
+}
+
+/** Evaluates dose reduction from personal exposure reduction effect. */
+function evaluateExposureEffect(
+  effect: { reductionBasisPoints: number },
+  outdoorPm25: number
+): number {
+  const base = calculateInhaledDose(outdoorPm25, 120, 'adult');
+  const next = calculateInhaledDose(
+    outdoorPm25,
+    120,
+    'adult',
+    effect.reductionBasisPoints
+  );
+  return base.ok && next.ok ? base.value - next.value : 0;
+}
+
 /** Evaluates isolated single-action inhaled dose mitigation for a standard adult. */
 function evaluateActionDose(
   action: Action,
@@ -33,20 +60,9 @@ function evaluateActionDose(
 
   for (const effect of action.effects) {
     if (effect.type === 'indoorPm25Reduction') {
-      const factor = 1 - effect.reductionBasisPoints / 10000;
-      const mitigated = Math.max(0, toInteger(indoorPm25 * factor));
-      const base = calculateInhaledDose(indoorPm25, 1320, 'adult');
-      const next = calculateInhaledDose(mitigated, 1320, 'adult');
-      if (base.ok && next.ok) saved += base.value - next.value;
+      saved += evaluateIndoorEffect(effect, indoorPm25);
     } else if (effect.type === 'exposureReduction') {
-      const base = calculateInhaledDose(outdoorPm25, 120, 'adult');
-      const next = calculateInhaledDose(
-        outdoorPm25,
-        120,
-        'adult',
-        effect.reductionBasisPoints
-      );
-      if (base.ok && next.ok) saved += base.value - next.value;
+      saved += evaluateExposureEffect(effect, outdoorPm25);
     }
   }
   return toInteger(saved);

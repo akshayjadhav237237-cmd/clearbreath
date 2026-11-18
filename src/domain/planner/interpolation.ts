@@ -56,10 +56,10 @@ function interpolateValue(
   return { pm25: 0, pm10: 0 };
 }
 
-/** Interpolates or fills missing hours to ensure a full 24-hour diurnal reading series. */
-export function interpolateHourlySeries(
+/** Builds an hourly index map from valid input readings. */
+function indexReadingsByHour(
   readings: readonly HourlyReading[]
-): Result<readonly HourlyReading[], DomainError> {
+): Result<Map<number, HourlyReading>, DomainError> {
   if (readings.length === 0) {
     return err({
       code: 'EMPTY_READINGS',
@@ -80,6 +80,17 @@ export function interpolateHourlySeries(
       message: 'No valid hourly readings within 0 to 23 hours range.',
     });
   }
+
+  return ok(readingsByHour);
+}
+
+/** Interpolates or fills missing hours to ensure a full 24-hour diurnal reading series. */
+export function interpolateHourlySeries(
+  readings: readonly HourlyReading[]
+): Result<readonly HourlyReading[], DomainError> {
+  const mapRes = indexReadingsByHour(readings);
+  if (!mapRes.ok) return mapRes;
+  const readingsByHour = mapRes.value;
 
   const knownHours = Array.from(readingsByHour.keys()).sort((a, b) => a - b);
   const completeSeries: HourlyReading[] = [];
