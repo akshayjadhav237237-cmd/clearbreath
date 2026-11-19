@@ -50,7 +50,7 @@ const baseContext: LlmSafeContext = {
   question: null,
 };
 
-describe('AiOrchestrator cloud failure fallbacks', () => {
+describe('AiOrchestrator cloud malformed response fallbacks', () => {
   it('falls back to local when Gemini returns malformed JSON', async () => {
     const deps = createMockDeps(
       async () =>
@@ -88,7 +88,9 @@ describe('AiOrchestrator cloud failure fallbacks', () => {
     expect(res.ok).toBe(true);
     if (res.ok) expect(res.value.source).toBe('local');
   });
+});
 
+describe('AiOrchestrator cloud HTTP status fallbacks', () => {
   it('falls back to local on HTTP server errors', async () => {
     const deps = createMockDeps(
       async () => new Response('Server error', { status: 503 })
@@ -101,6 +103,21 @@ describe('AiOrchestrator cloud failure fallbacks', () => {
     if (res.ok) {
       expect(res.value.source).toBe('local');
       expect(res.value.fallbackReason).toContain('503');
+    }
+  });
+
+  it('falls back to local with modelUnavailable when Gemini returns 404', async () => {
+    const deps = createMockDeps(
+      async () => new Response('model not found', { status: 404 })
+    );
+    const orchestrator = new AiOrchestrator(deps);
+    const res = await orchestrator.getPlanNarrative(baseContext, {
+      consent: true,
+    });
+    expect(res.ok).toBe(true);
+    if (res.ok) {
+      expect(res.value.source).toBe('local');
+      expect(res.value.fallbackReason).toBe('modelUnavailable');
     }
   });
 });

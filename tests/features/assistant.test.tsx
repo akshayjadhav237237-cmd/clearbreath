@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { AssistantPanel } from '../../src/features/assistant';
+import { AssistantChatBox } from '../../src/features/assistant/chat-transcript';
 
 afterEach(() => {
   cleanup();
@@ -46,5 +47,31 @@ describe('AssistantPanel', () => {
     fireEvent.click(submitBtn);
 
     expect(await screen.findByText(/can i exercise outdoors\?/i)).toBeDefined();
+  });
+
+  it('renders fallback notice when model is unavailable', () => {
+    const messages = [
+      {
+        id: '1',
+        sender: 'assistant' as const,
+        text: 'Local recommendation',
+        source: 'local' as const,
+        fallbackReason: 'modelUnavailable',
+      },
+    ];
+    render(
+      <AssistantChatBox
+        messages={messages}
+        input=""
+        isLoading={false}
+        onInputChange={() => {}}
+        onSend={() => {}}
+        placeholder="Ask"
+        sendLabel="Send"
+      />
+    );
+    expect(
+      screen.getByText('AI model unavailable, local guidance shown.')
+    ).toBeDefined();
   });
 });

@@ -23,12 +23,12 @@ describe('App shell', () => {
     expect(skipLink.getAttribute('href')).toBe('#main-content');
   });
 
-  it('switches navigation tabs upon user click', () => {
+  it('switches navigation tabs upon user click', async () => {
     render(<App />);
     const householdTab = screen.getByRole('button', { name: /household/i });
     fireEvent.click(householdTab);
     expect(
-      screen.getByRole('heading', { name: /household profile/i })
+      await screen.findByRole('heading', { name: /household profile/i })
     ).toBeDefined();
   });
 

@@ -138,4 +138,32 @@ describe('GeminiProvider HTTP error code mappings', () => {
     expect(isErr(rateRes)).toBe(true);
     if (isErr(rateRes)) expect(rateRes.error.code).toBe('rateLimited');
   });
+
+  it('maps HTTP 404 or deprecated/not-found body to modelUnavailable', async () => {
+    const notFoundFetcher: FetchPort = {
+      fetch: async () =>
+        ({
+          ok: false,
+          status: 404,
+          text: async () => 'models/gemini-old is not found',
+        }) as Response,
+    };
+    const notFoundProvider = new GeminiProvider('key', notFoundFetcher);
+    const nfRes = await notFoundProvider.explainPlan(BASE_CONTEXT);
+    expect(isErr(nfRes)).toBe(true);
+    if (isErr(nfRes)) expect(nfRes.error.code).toBe('modelUnavailable');
+
+    const deprFetcher: FetchPort = {
+      fetch: async () =>
+        ({
+          ok: false,
+          status: 400,
+          text: async () => 'Model is deprecated or unsupported',
+        }) as Response,
+    };
+    const deprProvider = new GeminiProvider('key', deprFetcher);
+    const dpRes = await deprProvider.explainPlan(BASE_CONTEXT);
+    expect(isErr(dpRes)).toBe(true);
+    if (isErr(dpRes)) expect(dpRes.error.code).toBe('modelUnavailable');
+  });
 });
