@@ -4,28 +4,28 @@ Empirical verification audit conducted on 2026-11-19.
 
 ## 1. Automated Verification Suite Summary
 
-| Check Category           | Command                     | Empirical Result                                           | Gate Status |
-| :----------------------- | :-------------------------- | :--------------------------------------------------------- | :---------- |
-| TypeScript Typecheck     | `npm run typecheck`         | 0 errors (`tsc -b --noEmit`)                               | PASS        |
-| ESLint (Flat Config)     | `npm run lint`              | 0 errors, 0 warnings (194 files)                           | PASS        |
-| Prettier Formatting      | `npm run format:check`      | Clean format check (LF, 2 spaces)                          | PASS        |
-| Knip Hygiene Scan        | `npm run knip`              | 0 unused files, deps, or exports                           | PASS        |
-| Code Duplication (JSCPD) | `npm run dup`               | 0.00% duplicate tokens (0 clones)                          | PASS        |
-| Bundle Budget            | `npm run bundle:check`      | JS Gzip: 69.88 kB (<75 kB), CSS: 5.34 kB (<20 kB)          | PASS        |
-| Unit & Integration Tests | `npm run test:coverage`     | 47 test suites, 301 tests passed                           | PASS        |
-| Real Chromium E2E Tests  | `npm run e2e`               | 4 spec files, 17 tests passed                              | PASS        |
-| Lighthouse Mobile Audit  | `npx lighthouse <live-url>` | 100 / 100 / 100 / 100 (live median), 100 / 100 / 100 / 100 | PASS        |
+| Check Category           | Command                     | Empirical Result                                         | Gate Status |
+| :----------------------- | :-------------------------- | :------------------------------------------------------- | :---------- |
+| TypeScript Typecheck     | `npm run typecheck`         | 0 errors (`tsc -b --noEmit`)                             | PASS        |
+| ESLint (Flat Config)     | `npm run lint`              | 0 errors, 0 warnings (194 files)                         | PASS        |
+| Prettier Formatting      | `npm run format:check`      | Clean format check (LF, 2 spaces)                        | PASS        |
+| Knip Hygiene Scan        | `npm run knip`              | 0 unused files, deps, or exports                         | PASS        |
+| Code Duplication (JSCPD) | `npm run dup`               | 0.00% duplicate tokens (0 clones)                        | PASS        |
+| Bundle Budget            | `npm run bundle:check`      | JS Gzip: 69.88 kB (<75 kB), CSS: 5.34 kB (<20 kB)        | PASS        |
+| Unit & Integration Tests | `npm run test:coverage`     | 48 test suites, 308 tests passed                         | PASS        |
+| Real Chromium E2E Tests  | `npm run e2e`               | 4 spec files, 17 tests passed                            | PASS        |
+| Lighthouse Mobile Audit  | `npx lighthouse <live-url>` | 99 / 100 / 100 / 92 (live median), 100 / 100 / 100 / 100 | PASS        |
 
 ## 2. Test Coverage Metrics
 
 Recorded via `@vitest/coverage-v8`:
 
-- **Statements**: 91.99% (Threshold: 90%)
-- **Branches**: 86.37% (Threshold: 85%)
-- **Functions**: 91.33% (Threshold: 90%)
-- **Lines**: 91.99% (Threshold: 90%)
-- **Test Suites**: 47 passed (0 failed)
-- **Tests**: 301 passed (0 failed)
+- **Statements**: 91.89% (Threshold: 90%)
+- **Branches**: 86.36% (Threshold: 85%)
+- **Functions**: 91.36% (Threshold: 90%)
+- **Lines**: 91.89% (Threshold: 90%)
+- **Test Suites**: 48 passed (0 failed)
+- **Tests**: 308 passed (0 failed)
 
 ## 3. Real Chromium End-to-End Suite
 
@@ -59,10 +59,10 @@ Verified using Playwright against production build:
 
 Audited via Google Lighthouse 13.5 in headless Chromium across 3 mobile runs on 2026-11-19:
 
-- **Performance**: 100 / 100 (live remote median: 97, 100, 100), 100 / 100 (local preview)
+- **Performance**: 99 / 100 (live remote median: 99, 80, 100), 100 / 100 (local preview)
 - **Accessibility**: 100 / 100
 - **Best Practices**: 100 / 100
-- **SEO**: 100 / 100
+- **SEO**: 92 / 100 (live remote runs: 92, 92, 100), 100 / 100 (local preview)
 
 ## 5. Security & Privacy Audit
 
@@ -73,7 +73,7 @@ Audited via Google Lighthouse 13.5 in headless Chromium across 3 mobile runs on 
 
 ## 6. Submission Freeze Status
 
-- Submission frozen: 2026-11-19T16:15:00+05:30.
-- Quality contract: verified across 134 source files and 49 test files.
+- Submission frozen: 2026-11-19T18:00:00+05:30.
+- Quality contract: verified across 134 source files and 50 test files.
 - Remote repository: `https://github.com/akshayjadhav237237-cmd/clearbreath`.
 - Target deployment: `https://akshayjadhav237237-cmd.github.io/clearbreath/`.

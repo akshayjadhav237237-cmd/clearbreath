@@ -6,6 +6,8 @@
 
 Clearbreath is a GenAI-powered urban air quality advisory assistant designed to help families and communities navigate severe winter smog episodes. Live at [https://akshayjadhav237237-cmd.github.io/clearbreath/](https://akshayjadhav237237-cmd.github.io/clearbreath/).
 
+- **Demo**: https://akshayjadhav237237-cmd.github.io/clearbreath/
+
 ## Vertical & Persona
 
 - **Vertical**: Family and community air-quality planning during seasonal winter smog episodes.
@@ -30,7 +32,7 @@ graph TD
   B --> C[Grounding Facts & Allowlist Context Builder]
   C --> D{User Consent?}
   D -- No / Local Only --> E[Deterministic Local Template Engine]
-  D -- Yes + Key --> F[Gemini 3.5 Flash Grounded Invoker]
+  D -- Yes + Key --> F[Gemini 3.8 Flash Grounded Invoker]
   E --> G[Zustand Store & Persistence Layer]
   F --> G
   G --> H[Vertical Feature Panels: AirNow, Plan, Actions, Compare, Assistant, Community]
@@ -68,7 +70,7 @@ AI is optional; domain engines run in the browser without network calls after th
 | **Problem Alignment** | CPCB AQI, mass-balance infiltration, dose calculations                 | `src/domain/`, `src/features/`                            |
 | **Security**          | Allowlist egress, strict CSP, memory-only key isolation                | `e2e/privacy.spec.ts`, `tests/ai/privacy/privacy.test.ts` |
 | **Efficiency**        | Initial JS $< 75$ kB gzip, in-browser engine execution                 | `scripts/check-bundle.mjs`                                |
-| **Testing**           | 47 test suites, 301 unit tests, 17 real Chromium E2E                   | `npm run test:coverage`, `npm run e2e`                    |
+| **Testing**           | 48 test suites, 308 unit tests, 17 real Chromium E2E                   | `npm run test:coverage`, `npm run e2e`                    |
 | **Accessibility**     | automated axe-core checks in Chromium found 0 violations on 2026-11-19 | `e2e/a11y.spec.ts`, `docs/VERIFICATION.md`                |
 
 ## Commands
