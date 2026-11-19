@@ -3,9 +3,7 @@
   "entry": ["tests/**/*.{ts,tsx}"],
   "project": ["src/**/*.{ts,tsx,css}", "tests/**/*.{ts,tsx}"],
   "ignoreDependencies": [
-    "zustand",
     "@testing-library/jest-dom",
-    "@testing-library/user-event",
-    "axe-core"
+    "@testing-library/user-event"
   ]
 }

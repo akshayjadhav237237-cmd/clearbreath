@@ -18,7 +18,8 @@
     "test:coverage": "vitest run --coverage",
     "knip": "knip",
     "dup": "jscpd src --threshold 3 --min-lines 8 --reporters console",
-    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test:coverage && npm run knip && npm run dup && npm run build"
+    "bundle:check": "node scripts/check-bundle.mjs",
+    "check": "npm run typecheck && npm run lint && npm run format:check && npm run test:coverage && npm run knip && npm run dup && npm run build && npm run bundle:check"
   },
   "dependencies": {
     "react": "18.3.1",
