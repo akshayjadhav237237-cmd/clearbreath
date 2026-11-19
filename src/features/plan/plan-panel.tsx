@@ -6,6 +6,8 @@ import { Badge } from '../../shared/ui';
 import { getTranslations } from '../../shared/i18n';
 import type { DailyPlan, HourlyReading } from '../../domain/contracts';
 import { DiurnalChart } from './diurnal-chart';
+import { PlanExportBar } from './plan-export-bar';
+import { SmogDayPlanPrint } from '../print';
 
 type OutdoorWindow = DailyPlan['outdoorWindows'][number];
 type PurifierSlot = DailyPlan['purifierSchedule'][number];
@@ -29,7 +31,7 @@ function PlanMetrics({
   ).length;
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 print:hidden">
       <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
@@ -38,7 +40,7 @@ function PlanMetrics({
           <Badge severity="good">SAFEST WINDOW</Badge>
         </div>
         <p className="mt-3 font-mono text-2xl font-extrabold text-emerald-800 dark:text-emerald-300">
-          {String(bestWindow.startHour).padStart(2, '0')}:00 –{' '}
+          {String(bestWindow.startHour).padStart(2, '0')}:00 â€“{' '}
           {String(bestWindow.endHour).padStart(2, '0')}:00
         </p>
         <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
@@ -63,7 +65,7 @@ function PlanMetrics({
           Window:{' '}
           <span className="font-semibold text-slate-900 dark:text-slate-100">
             {ventWindow
-              ? `${String(ventWindow.startHour).padStart(2, '0')}:00 – ${String(ventWindow.endHour).padStart(2, '0')}:00`
+              ? `${String(ventWindow.startHour).padStart(2, '0')}:00 â€“ ${String(ventWindow.endHour).padStart(2, '0')}:00`
               : 'Keep windows shut'}
           </span>
         </p>
@@ -124,10 +126,13 @@ export function PlanPanel(): JSX.Element {
     averageAqi: 120,
   };
   const maxPm25 = Math.max(...readings.map((r) => r.pm25));
+  const handlePrint = (): void => {
+    if (typeof window !== 'undefined') window.print();
+  };
 
   return (
     <section aria-labelledby="plan-heading" className="space-y-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900 print:hidden">
         <h2
           id="plan-heading"
           className="text-xl font-bold text-slate-900 dark:text-slate-50"
@@ -149,6 +154,15 @@ export function PlanPanel(): JSX.Element {
         ventWindow={plan.bestVentilationWindow}
         purifierSchedule={plan.purifierSchedule}
         t={t}
+      />
+      <PlanExportBar plan={plan} onPrint={handlePrint} />
+      <SmogDayPlanPrint
+        profile={profile}
+        plan={plan}
+        currentAqi={bestWindow.averageAqi}
+        aqiCategory="severe"
+        dateFormatted="2026-11-19"
+        onPrint={handlePrint}
       />
     </section>
   );
