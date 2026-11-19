@@ -25,7 +25,7 @@ describe('PlanExportBar component', () => {
 
     render(<PlanExportBar plan={mockPlan} onPrint={printSpy} />);
 
-    const csvBtn = screen.getByRole('button', { name: /export plan as csv/i });
+    const csvBtn = screen.getByRole('button', { name: /export csv/i });
     fireEvent.click(csvBtn);
 
     expect(downloadSpy).toHaveBeenCalledWith(
@@ -47,7 +47,7 @@ describe('PlanExportBar component', () => {
     render(<PlanExportBar plan={mockPlan} onPrint={printSpy} />);
 
     const calBtn = screen.getByRole('button', {
-      name: /export plan to calendar/i,
+      name: /export calendar/i,
     });
     fireEvent.click(calBtn);
 
@@ -70,7 +70,7 @@ describe('PlanExportBar component', () => {
     render(<PlanExportBar plan={mockPlan} onPrint={printSpy} />);
 
     const backupBtn = screen.getByRole('button', {
-      name: /export household profile json/i,
+      name: /backup profile/i,
     });
     fireEvent.click(backupBtn);
 
@@ -89,7 +89,7 @@ describe('PlanExportBar component', () => {
     render(<PlanExportBar plan={mockPlan} onPrint={printSpy} />);
 
     const printBtn = screen.getByRole('button', {
-      name: /print family smog action plan/i,
+      name: /print family plan/i,
     });
     fireEvent.click(printBtn);
     expect(printSpy).toHaveBeenCalledTimes(1);

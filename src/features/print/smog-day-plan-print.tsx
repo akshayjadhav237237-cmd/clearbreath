@@ -36,7 +36,7 @@ function PrintTable({ actions }: { actions: readonly Action[] }): JSX.Element {
             <td className="py-1.5 font-semibold">{action.title}</td>
             <td className="py-1.5 capitalize">{action.category}</td>
             <td className="py-1.5">Effort {action.effort}/3</td>
-            <td className="py-1.5">â‚¹{action.costRupees}</td>
+            <td className="py-1.5">₹{action.costRupees}</td>
           </tr>
         ))}
       </tbody>
@@ -60,10 +60,10 @@ export function SmogDayPlanPrint({
       <div className="mb-4 flex items-center justify-between border-b border-slate-200 pb-3 print:border-black">
         <div>
           <h1 className="text-xl font-black uppercase tracking-wide print:text-2xl">
-            Clearbreath â€¢ Smog-Day Family Action Plan
+            Clearbreath • Smog-Day Family Action Plan
           </h1>
           <p className="text-xs text-slate-600 print:text-black">
-            Generated on: {dateFormatted} â€¢ Household Members:{' '}
+            Generated on: {dateFormatted} • Household Members:{' '}
             {profile.members.length}
           </p>
         </div>
@@ -71,10 +71,10 @@ export function SmogDayPlanPrint({
           <button
             type="button"
             onClick={onPrint}
-            aria-label="Print Family Action Plan"
+            aria-label="Print Action Plan"
             className="rounded-lg bg-sky-700 px-4 py-2 text-xs font-bold text-white hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-sky-500 print:hidden"
           >
-            ðŸ–¨ï¸ Print Plan
+            Print Action Plan
           </button>
         )}
       </div>
@@ -84,7 +84,7 @@ export function SmogDayPlanPrint({
           Air Quality Status
         </h2>
         <p className="text-base font-extrabold text-slate-900 print:text-black">
-          AQI {currentAqi} â€¢ {aqiCategory.toUpperCase()}
+          AQI {currentAqi} • {aqiCategory.toUpperCase()}
         </p>
         <p className="text-xs text-slate-700 print:text-black">
           {plan.advisorySummary}

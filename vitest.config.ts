@@ -5,6 +5,7 @@ export default defineConfig({
     environment: 'jsdom',
     testTimeout: 30000,
     hookTimeout: 30000,
+    include: ['tests/**/*.{test,spec}.{ts,tsx}'],
     coverage: {
       provider: 'v8',
       thresholds: {

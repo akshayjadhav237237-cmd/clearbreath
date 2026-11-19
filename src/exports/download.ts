@@ -21,6 +21,11 @@ export function triggerBlobDownload(
   document.body.removeChild(anchor);
 
   window.setTimeout(() => {
-    window.URL.revokeObjectURL(objectUrl);
+    if (
+      typeof window !== 'undefined' &&
+      typeof window.URL?.revokeObjectURL === 'function'
+    ) {
+      window.URL.revokeObjectURL(objectUrl);
+    }
   }, 100);
 }

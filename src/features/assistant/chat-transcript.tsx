@@ -23,7 +23,7 @@ function getBubbleStyle(
   refusal?: boolean
 ): string {
   if (sender === 'user') {
-    return 'bg-sky-600 text-white';
+    return 'bg-sky-700 text-white';
   }
   if (refusal) {
     return 'border border-amber-300 bg-amber-50 text-amber-950 dark:border-amber-700 dark:bg-amber-950/30';
@@ -108,12 +108,13 @@ export function AssistantChatBox({
           maxLength={300}
           onChange={(e) => onInputChange(e.target.value)}
           placeholder={placeholder}
+          aria-label={placeholder}
           className="flex-1 rounded-xl border border-slate-300 px-4 py-2 text-sm text-slate-900 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
         />
         <button
           type="submit"
           disabled={isLoading || !input.trim()}
-          className="rounded-xl bg-sky-600 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-700 disabled:opacity-50"
+          className="rounded-xl bg-sky-700 px-5 py-2 text-sm font-semibold text-white shadow-sm hover:bg-sky-800 disabled:opacity-50"
         >
           {isLoading ? '...' : sendLabel}
         </button>
@@ -140,7 +141,7 @@ export function FactsModal({
             key={f.id}
             className="rounded-lg border border-slate-200 p-2 text-xs dark:border-slate-800"
           >
-            <span className="font-mono text-[10px] text-sky-600">
+            <span className="font-mono text-[10px] text-sky-700 dark:text-sky-300">
               [{f.kind}]
             </span>
             <p className="mt-0.5">{f.text}</p>

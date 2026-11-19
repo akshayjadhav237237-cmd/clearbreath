@@ -19,7 +19,7 @@ describe('RecommendationsPanel', () => {
 
     const indoorFilter = screen.getByRole('button', { name: 'Indoor' });
     fireEvent.click(indoorFilter);
-    expect(indoorFilter.className).toContain('bg-sky-600');
+    expect(indoorFilter.className).toContain('bg-sky-700');
   });
 
   it('toggles action completion and recalculates avoided dose', () => {

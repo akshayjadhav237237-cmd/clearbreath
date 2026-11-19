@@ -1,7 +1,7 @@
 {
   "$schema": "https://unpkg.com/knip@5/overview/config-schema.json",
-  "entry": ["tests/**/*.{ts,tsx}"],
-  "project": ["src/**/*.{ts,tsx,css}", "tests/**/*.{ts,tsx}"],
+  "entry": ["tests/**/*.{ts,tsx}", "e2e/**/*.spec.ts"],
+  "project": ["src/**/*.{ts,tsx,css}", "tests/**/*.{ts,tsx}", "e2e/**/*.ts"],
   "ignoreDependencies": [
     "@testing-library/jest-dom",
     "@testing-library/user-event"

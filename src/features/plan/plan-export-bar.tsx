@@ -25,42 +25,42 @@ function ActionButtons({
       <button
         type="button"
         onClick={onExportCsv}
-        aria-label="Export Plan as CSV"
+        aria-label="Export CSV"
         className={btnClass}
       >
-        ðŸ“Š CSV
+        Export CSV
       </button>
       <button
         type="button"
         onClick={onExportIcs}
-        aria-label="Export Plan to Calendar"
+        aria-label="Export Calendar"
         className={btnClass}
       >
-        ðŸ“… Calendar
+        Export Calendar
       </button>
       <button
         type="button"
         onClick={onExportJson}
-        aria-label="Export Household Profile JSON"
+        aria-label="Backup Profile"
         className={btnClass}
       >
-        ðŸ’¾ Backup
+        Backup Profile
       </button>
       <button
         type="button"
         onClick={onImportClick}
-        aria-label="Import Household Profile JSON"
+        aria-label="Restore Profile"
         className={btnClass}
       >
-        ðŸ“‚ Restore
+        Restore Profile
       </button>
       <button
         type="button"
         onClick={onPrint}
-        aria-label="Print Family Smog Action Plan"
+        aria-label="Print Family Plan"
         className="rounded-lg bg-sky-700 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-sky-800"
       >
-        ðŸ–¨ï¸ Print Plan
+        Print Family Plan
       </button>
     </div>
   );

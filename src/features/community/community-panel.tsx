@@ -70,7 +70,7 @@ export function CommunityPanel(): JSX.Element {
           <button
             type="button"
             onClick={() => void handleCopy()}
-            className="rounded-xl bg-sky-600 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            className="rounded-xl bg-sky-700 px-5 py-2.5 text-xs font-bold text-white shadow-sm hover:bg-sky-800 focus:outline-none focus:ring-2 focus:ring-sky-500"
           >
             📋 {t.community.copyBroadcast}
           </button>

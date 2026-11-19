@@ -10,6 +10,8 @@ interface AssistantHeaderProps {
   readonly modeGemini: string;
   readonly modeLocal: string;
   readonly consentToggleText: string;
+  readonly apiKey?: string;
+  readonly onApiKeyChange?: (key: string) => void;
 }
 
 /** Header sub-component rendering AI disclaimer, mode badge, and consent toggle. */
@@ -22,6 +24,8 @@ export function AssistantHeader({
   modeGemini,
   modeLocal,
   consentToggleText,
+  apiKey = '',
+  onApiKeyChange,
 }: AssistantHeaderProps): JSX.Element {
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -55,10 +59,30 @@ export function AssistantHeader({
           type="checkbox"
           checked={aiConsent}
           onChange={(e) => onToggleConsent(e.target.checked)}
-          className="rounded text-sky-600 focus:ring-sky-500"
+          className="rounded text-sky-700 focus:ring-sky-500"
         />
         <span className="font-medium">{consentToggleText}</span>
       </label>
+
+      {aiConsent && onApiKeyChange && (
+        <div className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3 dark:border-slate-800">
+          <label
+            htmlFor="gemini-key-input"
+            className="text-xs font-semibold text-slate-700 dark:text-slate-300"
+          >
+            Gemini API Key:
+          </label>
+          <input
+            id="gemini-key-input"
+            type="password"
+            aria-label="Gemini API Key"
+            placeholder="Enter API key (in-memory only; never persisted)"
+            value={apiKey}
+            onChange={(e) => onApiKeyChange(e.target.value)}
+            className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
+          />
+        </div>
+      )}
     </div>
   );
 }

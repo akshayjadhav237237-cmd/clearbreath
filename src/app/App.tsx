@@ -82,7 +82,7 @@ function AppNav(): JSX.Element {
             onClick={() => setActiveTab(tab.id)}
             className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-xs font-bold transition-colors ${
               activeTab === tab.id
-                ? 'border-sky-600 text-sky-600 dark:border-sky-400 dark:text-sky-400'
+                ? 'border-sky-700 text-sky-700 dark:border-sky-400 dark:text-sky-400'
                 : 'border-transparent text-slate-700 hover:border-slate-300 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100'
             }`}
           >

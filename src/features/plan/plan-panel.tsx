@@ -40,7 +40,7 @@ function PlanMetrics({
           <Badge severity="good">SAFEST WINDOW</Badge>
         </div>
         <p className="mt-3 font-mono text-2xl font-extrabold text-emerald-800 dark:text-emerald-300">
-          {String(bestWindow.startHour).padStart(2, '0')}:00 â€“{' '}
+          {String(bestWindow.startHour).padStart(2, '0')}:00 –{' '}
           {String(bestWindow.endHour).padStart(2, '0')}:00
         </p>
         <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
@@ -65,7 +65,7 @@ function PlanMetrics({
           Window:{' '}
           <span className="font-semibold text-slate-900 dark:text-slate-100">
             {ventWindow
-              ? `${String(ventWindow.startHour).padStart(2, '0')}:00 â€“ ${String(ventWindow.endHour).padStart(2, '0')}:00`
+              ? `${String(ventWindow.startHour).padStart(2, '0')}:00 – ${String(ventWindow.endHour).padStart(2, '0')}:00`
               : 'Keep windows shut'}
           </span>
         </p>

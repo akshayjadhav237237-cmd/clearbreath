@@ -20,6 +20,7 @@ export function AssistantPanel(): JSX.Element {
   } = useAppStore();
   const t = getTranslations(language);
   const [showFacts, setShowFacts] = useState(false);
+  const [apiKey, setApiKey] = useState('');
 
   const aqiRes = calculateAqi(
     hourlySeries?.readings[12] ?? { hour: 12, pm25: 180, pm10: 290 }
@@ -62,6 +63,8 @@ export function AssistantPanel(): JSX.Element {
         modeGemini={t.assistant.modeGemini}
         modeLocal={t.assistant.modeLocal}
         consentToggleText={t.assistant.consentToggle}
+        apiKey={apiKey}
+        onApiKeyChange={setApiKey}
       />
 
       <AssistantChatBox

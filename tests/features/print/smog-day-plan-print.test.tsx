@@ -68,7 +68,7 @@ describe('SmogDayPlanPrint component', () => {
     );
 
     const btn = screen.getByRole('button', {
-      name: /print family action plan/i,
+      name: /print action plan/i,
     });
     expect(btn).toBeDefined();
     expect(btn.className).toContain('print:hidden');

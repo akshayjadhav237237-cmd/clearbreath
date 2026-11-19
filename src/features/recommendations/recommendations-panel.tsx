@@ -68,7 +68,7 @@ function RecommendationsHeader({
             onClick={() => onSelectCategory(cat.id)}
             className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
               selectedCategory === cat.id
-                ? 'bg-sky-600 text-white'
+                ? 'bg-sky-700 text-white'
                 : 'bg-slate-100 text-slate-700 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300'
             }`}
           >
