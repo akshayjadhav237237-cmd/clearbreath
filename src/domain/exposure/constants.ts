@@ -63,7 +63,7 @@ export const EXPOSURE_SOURCES: Readonly<Record<string, SourceReference>> = {
 /** Residential air exchange rate parameters categorized by building envelope sealing class. */
 export const AIR_EXCHANGE_RATES: Readonly<SealingRateMap> = {
   leaky: {
-    ratePerHour: 1.5,
+    ratePerHour: 3 / 2,
     sourceId: SOURCE_ASHRAE,
     minPerHour: 1.0,
     maxPerHour: 3.0,
@@ -148,6 +148,6 @@ export const RESTING_BREATHING_RATES: Readonly<
 
 /** Adult active inhalation volumetric rate parameter. */
 export const ADULT_ACTIVE_BREATHING_RATE: Readonly<BreathingRateParam> = {
-  rateM3h: 1.5,
+  rateM3h: 3 / 2,
   sourceId: SOURCE_EPA_EXPOSURE,
 };

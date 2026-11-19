@@ -22,7 +22,7 @@ export function createWinterSmogReadings(): readonly HourlyReading[] {
   const readings: HourlyReading[] = [];
   for (let hour = 0; hour < 24; hour += 1) {
     const pm25 = DIURNAL_PM25_MAP[hour] ?? 150;
-    const pm10 = Math.round(pm25 * 1.5);
+    const pm10 = Math.round((pm25 * 3) / 2);
     readings.push({ hour, pm25, pm10 });
   }
   return readings;

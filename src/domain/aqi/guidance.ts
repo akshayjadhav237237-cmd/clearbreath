@@ -9,7 +9,7 @@ const GUIDANCE_TABLE: Record<AqiCategory, SensitivityGuidance> = {
     low: 'Air quality is ideal. Enjoy outdoor activities and keep home ventilated with fresh air.',
     elevated:
       'Air quality is good. Normal outdoor activities and natural room ventilation are recommended.',
-    high: 'Air quality is clean. Safe for all outdoor activities and daily routines.',
+    high: 'Air quality is clean. Suitable for outdoor activities and daily routines.',
   },
   satisfactory: {
     low: 'Air quality is acceptable. Normal outdoor activities permitted; standard room ventilation is suitable.',
@@ -32,11 +32,11 @@ const GUIDANCE_TABLE: Record<AqiCategory, SensitivityGuidance> = {
   veryPoor: {
     low: 'Air quality is very poor. Restrict outdoor exercise, keep windows sealed, and run indoor air purifiers.',
     elevated:
-      'Air quality is very poor. Stay indoors, avoid all outdoor exertion, and use high-filtration masks if travelling.',
+      'Air quality is very poor. Stay indoors, avoid prolonged outdoor exertion, and use high-filtration masks if travelling.',
     high: 'Air quality is very poor. Remain indoors in sealed rooms with active air purifiers; wear fitted N95 masks outside.',
   },
   severe: {
-    low: 'Air quality is severe. Avoid all outdoor physical activity, seal room gaps, and operate air cleaners continuously.',
+    low: 'Air quality is severe. Avoid strenuous outdoor physical activity, seal room gaps, and operate air cleaners continuously.',
     elevated:
       'Air quality is severe. Strictly avoid outdoor exposure, remain in a purified clean-room space, and run purifiers.',
     high: 'Air quality is severe. Emergency conditions: remain indoors in purified spaces, avoid outdoor transit, and seal rooms.',

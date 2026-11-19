@@ -115,7 +115,7 @@ describe('Exposure engine - mask efficiencies, breathing rates, and sources', ()
     });
     expect(getBreathingRate('adult', 'active')).toEqual({
       ok: true,
-      value: 1.5,
+      value: 3 / 2,
     });
     expect(getBreathingRate('older')).toEqual({ ok: true, value: 0.65 });
     expect(getBreathingRate('invalid' as AgeGroup)).toMatchObject({
@@ -133,7 +133,7 @@ describe('Exposure engine - mask efficiencies, breathing rates, and sources', ()
     expect(EXPOSURE_SOURCES['epa-exposure-factors-handbook']?.id).toBe(
       'epa-exposure-factors-handbook'
     );
-    expect(ADULT_ACTIVE_BREATHING_RATE.rateM3h).toBe(1.5);
+    expect(ADULT_ACTIVE_BREATHING_RATE.rateM3h).toBe(3 / 2);
     expect(RESTING_BREATHING_RATES.infant.rateM3h).toBe(0.25);
   });
 });

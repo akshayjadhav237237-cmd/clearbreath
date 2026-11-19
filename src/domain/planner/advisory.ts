@@ -10,13 +10,13 @@ export function generateAdvisorySummary(
   sensitivity: SensitivityLevel
 ): string {
   if (isAllSevere) {
-    return 'Severe air quality (AQI > 400) across all 24 hours. Stay indoors with windows sealed and operate air purifiers on high mode.';
+    return 'Severe air quality (AQI > 400) throughout the day. Stay indoors with windows sealed and operate air purifiers on high mode.';
   }
 
   const bestOutdoor = outdoorWindows[0];
   if (bestOutdoor === undefined) {
     if (sensitivity === 'high') {
-      return 'Outdoor air quality exceeds safe limits for high-sensitivity members (AQI > 200). Stay indoors and minimize outdoor exposure.';
+      return 'Outdoor air quality exceeds recommended limits for high-sensitivity members (AQI > 200). Stay indoors and minimize outdoor exposure.';
     }
     return 'Elevated smog levels persist. Avoid outdoor exertion and keep indoor air cleaned.';
   }

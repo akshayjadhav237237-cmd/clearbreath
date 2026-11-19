@@ -1,6 +1,6 @@
 /**
  * Domain integer unit helpers and rounding primitives.
- * Enforces zero floating-point leakage across domain layer boundaries.
+ * Enforces integer boundaries without floating-point leakage across domain layer boundaries.
  */
 
 /** Converts a floating-point number to a bounded integer. */
