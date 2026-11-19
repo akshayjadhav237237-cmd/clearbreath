@@ -17,5 +17,6 @@ export {
   SystemRandomPort,
   SystemSleepPort,
 } from './system-ports';
+export { browserStoragePort } from './browser-storage';
 export * from './ui/index';
 export * from './i18n/index';
