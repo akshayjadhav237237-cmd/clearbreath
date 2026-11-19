@@ -96,8 +96,11 @@ export class GeminiProvider implements AiProvider {
       contents: [{ role: 'user', parts: [{ text: userText }] }],
       generationConfig: {
         temperature: 0.2,
-        maxOutputTokens: 800,
+        maxOutputTokens: 1024,
         responseMimeType: 'application/json',
+        thinkingConfig: {
+          thinkingBudget: 0,
+        },
       },
     };
 
@@ -114,6 +117,19 @@ export class GeminiProvider implements AiProvider {
       const response = await this.fetcher.fetch(url, init);
 
       if (!response.ok) {
+        const errorText =
+          typeof response.text === 'function'
+            ? await response.text().catch(() => '')
+            : '';
+        if (
+          response.status === 404 ||
+          /not found|deprecated|unsupported/i.test(errorText)
+        ) {
+          return err({
+            code: 'modelUnavailable',
+            message: 'Gemini model unavailable or deprecated.',
+          });
+        }
         return err(this.mapHttpStatus(response.status));
       }
 
@@ -139,6 +155,11 @@ export class GeminiProvider implements AiProvider {
 
   /** Maps HTTP status codes to typed AI layer errors. */
   private mapHttpStatus(status: number): AiError {
+    if (status === 404)
+      return {
+        code: 'modelUnavailable',
+        message: 'Gemini model unavailable or deprecated.',
+      };
     if (status === 400)
       return { code: 'schema', message: 'Bad request to Gemini API.' };
     if (status === 401 || status === 403)

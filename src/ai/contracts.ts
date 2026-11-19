@@ -25,7 +25,8 @@ export type AiErrorCode =
   | 'injection'
   | 'groundingViolation'
   | 'consentMissing'
-  | 'aborted';
+  | 'aborted'
+  | 'modelUnavailable';
 
 /** Structured AI layer error containing no API keys or allowlisted data payloads. */
 export interface AiError {

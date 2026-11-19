@@ -16,6 +16,24 @@ import type {
 const SOURCE_LOCAL = 'local' as const;
 const SOURCE_GEMINI = 'gemini' as const;
 
+function buildLocalFallback<T>(
+  localResult: { readonly ok: boolean; readonly value?: T },
+  empty: T,
+  cloudError: { readonly code: string; readonly message: string }
+): OrchestratedResult<T> {
+  return {
+    data:
+      localResult.ok && localResult.value !== undefined
+        ? localResult.value
+        : empty,
+    source: SOURCE_LOCAL,
+    fallbackReason:
+      cloudError.code === 'modelUnavailable'
+        ? 'modelUnavailable'
+        : cloudError.message,
+  };
+}
+
 /** Executes cloud Gemini plan generation with timeout, retry, and grounding validation. */
 export async function executePlanCloud(
   ctx: LlmSafeContext,
@@ -56,11 +74,7 @@ export async function executePlanCloud(
   }
 
   const local = await deps.localProvider.explainPlan(ctx, options.signal);
-  return {
-    data: local.ok ? local.value : empty,
-    source: SOURCE_LOCAL,
-    fallbackReason: cloudRes.error.message,
-  };
+  return buildLocalFallback(local, empty, cloudRes.error);
 }
 
 /** Executes cloud Gemini Q&A with timeout, retry, and grounding validation. */
@@ -103,9 +117,5 @@ export async function executeAnswerCloud(
   }
 
   const local = await deps.localProvider.answer(ctx, options.signal);
-  return {
-    data: local.ok ? local.value : empty,
-    source: SOURCE_LOCAL,
-    fallbackReason: cloudRes.error.message,
-  };
+  return buildLocalFallback(local, empty, cloudRes.error);
 }
