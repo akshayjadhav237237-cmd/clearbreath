@@ -1,4 +1,4 @@
-# ADR 004: AI Grounding and Zero-PII Ingress Architecture
+# ADR 004: AI Grounding and Allowlist Egress Architecture
 
 ## Status
 
@@ -12,10 +12,10 @@ Clearbreath integrates generative AI to explain winter smog advisories and answe
 
 We implement a dual-layer AI safety, grounding, and privacy architecture:
 
-1. **Zero-PII Ingress (`LlmSafeContext`)**:
+1. **Allowlist Egress (`LlmSafeContext`)**:
    - Only allowlisted categorical fields are forwarded to external LLMs: coarse city name, AQI category, sensitivity level, presence of broad age groups (infant/child/adult/older), housing type, sealing class, cooking fuel, commute mode, budget band, language, and verified domain facts.
-   - Exact names, timestamps, coordinates, exact budgets, and floor area metrics are strictly stripped.
-   - API keys are held exclusively in memory (`ApiKeyHolder`) and never persisted to local storage or exported in telemetry.
+   - Exact names, timestamps, coordinates, exact budgets, and floor area metrics are stripped.
+   - API keys are held in memory (`ApiKeyHolder`) and not persisted to local storage or exported in telemetry.
 
 2. **Strict Grounding Validation**:
    - Model responses must conform to strict JSON schemas (`aiPlanNarrativeSchema`, `aiAnswerSchema`).
@@ -25,11 +25,11 @@ We implement a dual-layer AI safety, grounding, and privacy architecture:
 3. **Multi-Stage Prompt Injection Defense**:
    - User inputs undergo NFKC normalization, control character removal, and regex filtering against known jailbreak/injection markers.
 
-4. **Deterministic Offline Fallback (`LocalProvider`)**:
-   - If cloud inference is unavailable, rate-limited, times out, violates grounding, or lacks user consent, the orchestrator seamlessly falls back to local deterministic template synthesis, tagging response provenance (`source: 'local'`, `fallbackReason`).
+4. **Deterministic Local Fallback (`LocalProvider`)**:
+   - If cloud inference is unavailable, rate-limited, times out, violates grounding, or lacks user consent, the orchestrator falls back to local deterministic template synthesis, tagging response provenance (`source: 'local'`, `fallbackReason`).
 
 ## Consequences
 
-- Prevents prompt injection, token leakage, and hallucinated health or air quality metrics.
-- Complies with zero-PII egress principles and user privacy expectations.
-- Ensures the application remains fully functional offline and without cloud credentials.
+- Mitigates prompt injection, token leakage, and ungrounded health or air quality metrics.
+- Enforces allowlist egress boundaries and user privacy expectations.
+- Ensures application domain engines run in the browser without network calls after the page has loaded and without cloud credentials.

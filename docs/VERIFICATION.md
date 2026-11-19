@@ -8,7 +8,7 @@ Empirical verification audit conducted on 2026-11-19.
 | :----------------------- | :---------------------------------- | :----------------------------------------------------- | :---------- |
 | TypeScript Typecheck     | `npm run typecheck`                 | 0 errors (`tsc -b --noEmit`)                           | PASS        |
 | ESLint (Flat Config)     | `npm run lint`                      | 0 errors, 0 warnings (105 files)                       | PASS        |
-| Prettier Formatting      | `npm run format:check`              | 100% compliant (LF, 2 spaces)                          | PASS        |
+| Prettier Formatting      | `npm run format:check`              | Clean format check (LF, 2 spaces)                      | PASS        |
 | Knip Hygiene Scan        | `npm run knip`                      | 0 unused files, deps, or exports                       | PASS        |
 | Code Duplication (JSCPD) | `npm run dup`                       | 0.00% duplicate tokens                                 | PASS        |
 | Bundle Budget            | `npm run bundle:check`              | JS Gzip: 93.99 KB (<200 KB), Total: 99.92 KB (<400 KB) | PASS        |
@@ -32,11 +32,11 @@ Recorded via `@vitest/coverage-v8`:
 Verified using Playwright against production build:
 
 1. `e2e/a11y.spec.ts`:
-   - Full WCAG 2.1 / 2.2 AA audit on initial load (0 violations).
-   - Full WCAG audit across all vertical tabs (0 violations).
-   - Hindi locale accessibility audit (0 violations).
-   - Narrow mobile viewport (320px) responsive audit (0 violations).
-   - Print media emulation stylesheet audit (0 violations).
+   - automated axe-core checks in Chromium found 0 violations on 2026-11-19; see docs/VERIFICATION.md.
+   - automated axe-core checks across all vertical tabs in Chromium found 0 violations on 2026-11-19.
+   - automated axe-core checks in Hindi locale in Chromium found 0 violations on 2026-11-19.
+   - automated axe-core checks on narrow mobile viewport (320px) in Chromium found 0 violations on 2026-11-19.
+   - automated axe-core checks under print media emulation in Chromium found 0 violations on 2026-11-19.
 2. `e2e/keyboard.spec.ts`:
    - Skip-to-content bypass activation and focus management.
    - Tab list navigation without focus traps.
@@ -44,7 +44,7 @@ Verified using Playwright against production build:
 3. `e2e/privacy.spec.ts`:
    - Zero egress requests to Gemini when AI consent is disabled.
    - Zero CSP violations during full session interaction.
-   - API key never leaked to DOM, local storage, or telemetry.
+   - API key not found in DOM, local storage, or telemetry.
 4. `e2e/flows.spec.ts`:
    - Full smog-day planning and CSV export workflow.
    - Graceful recovery from corrupted `localStorage` payload.
@@ -61,13 +61,13 @@ Audited via Google Lighthouse 13.5 in headless Chromium:
 
 ## 5. Security & Privacy Audit
 
-- **Content Security Policy**: Strictly enforced in `index.html` with explicit whitelist (`generativelanguage.googleapis.com`, `open-meteo.com`).
-- **PII Scrubbing**: Names, exact ages, GPS coordinates, and raw addresses scrubbed prior to any LLM prompt formulation.
+- **Content Security Policy**: Enforced in `index.html` with explicit allowlist (`generativelanguage.googleapis.com`, `open-meteo.com`).
+- **Allowlist Scrubbing**: Identifiers, exact ages, GPS coordinates, and street addresses are excluded prior to LLM prompt formulation; see `src/ai/privacy/disclosure.ts`.
 - **Formula-Safe CSV**: Export sanitization prepends single quotes to formulas (`=`, `+`, `-`, `@`, `\t`, `\r`).
 
 ## 6. Submission Freeze Status
 
 - Submission frozen: 2026-11-19T11:10:00+05:30.
-- Quality contract: 100% compliant across all 105 source files and 45 test files.
+- Quality contract: verified across 105 source files and 45 test files.
 - Remote repository: `https://github.com/akshayjadhav237237-cmd/clearbreath`.
 - Target deployment: `https://akshayjadhav237237-cmd.github.io/clearbreath/`.

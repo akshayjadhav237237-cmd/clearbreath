@@ -36,7 +36,7 @@ export function sanitizeCsvCell(value: string | number | boolean): string {
   return guarded;
 }
 
-/** Generates formula-injection-safe CSV of recommended actions and quantitative impact. */
+/** Generates sanitized CSV of recommended actions and quantitative impact. */
 export function exportPlanCsv(
   items: readonly RecommendationExportItem[],
   plan: DailyPlan

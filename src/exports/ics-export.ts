@@ -122,7 +122,7 @@ function buildRoutineEvents(
   return events;
 }
 
-/** Generates RFC 5545 compliant iCalendar schedule for daily smog action routines. */
+/** Generates RFC 5545 conforming iCalendar schedule for daily smog action routines. */
 export function exportDailyPlanIcs(
   plan: DailyPlan,
   clock: Clock,

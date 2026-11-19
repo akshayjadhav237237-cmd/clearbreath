@@ -17,46 +17,42 @@ function getGzipSize(filePath) {
 const assetsDir = path.join(distDir, 'assets');
 const assetFiles = fs.readdirSync(assetsDir);
 
-let totalJsGzip = 0;
-let totalInitialGzip = 0;
+const MAX_INITIAL_JS_GZIP = 100 * 1024;
+const MAX_LAZY_CHUNK_GZIP = 40 * 1024;
+const MAX_CSS_GZIP = 20 * 1024;
 
-const htmlPath = path.join(distDir, 'index.html');
-if (fs.existsSync(htmlPath)) {
-  totalInitialGzip += getGzipSize(htmlPath);
-}
+let hasError = false;
+
+process.stdout.write('Bundle Budget Analysis:\n');
 
 for (const file of assetFiles) {
   const fullPath = path.join(assetsDir, file);
   const gzSize = getGzipSize(fullPath);
-  totalInitialGzip += gzSize;
+  const gzKb = (gzSize / 1024).toFixed(2);
 
-  if (file.endsWith('.js')) {
-    totalJsGzip += gzSize;
+  if (file.endsWith('.css')) {
+    process.stdout.write(`- CSS (${file}): ${gzKb} kB (Budget: 20 kB)\n`);
+    if (gzSize > MAX_CSS_GZIP) {
+      process.stderr.write(`CSS ${file} exceeds 20 kB budget!\n`);
+      hasError = true;
+    }
+  } else if (file.endsWith('.js')) {
+    const isInitial = file.startsWith('index-');
+    const budget = isInitial ? MAX_INITIAL_JS_GZIP : MAX_LAZY_CHUNK_GZIP;
+    const budgetLabel = isInitial
+      ? '100 kB (Initial JS)'
+      : '40 kB (Lazy Chunk)';
+    process.stdout.write(
+      `- JS (${file}): ${gzKb} kB (Budget: ${budgetLabel})\n`
+    );
+    if (gzSize > budget) {
+      process.stderr.write(`JS ${file} exceeds ${budgetLabel} budget!\n`);
+      hasError = true;
+    }
   }
 }
 
-const MAX_JS_GZIP = 200 * 1024;
-const MAX_TOTAL_GZIP = 400 * 1024;
-
-process.stdout.write(`Bundle Budget Analysis:\n`);
-process.stdout.write(
-  `- Total JS Gzip: ${(totalJsGzip / 1024).toFixed(2)} KB (Limit: 200 KB)\n`
-);
-process.stdout.write(
-  `- Total Initial Gzip: ${(totalInitialGzip / 1024).toFixed(2)} KB (Limit: 400 KB)\n`
-);
-
-if (totalJsGzip > MAX_JS_GZIP) {
-  process.stderr.write(
-    `JS gzip size ${(totalJsGzip / 1024).toFixed(2)} KB exceeds 200 KB limit!\n`
-  );
-  process.exit(1);
-}
-
-if (totalInitialGzip > MAX_TOTAL_GZIP) {
-  process.stderr.write(
-    `Total initial gzip size ${(totalInitialGzip / 1024).toFixed(2)} KB exceeds 400 KB limit!\n`
-  );
+if (hasError) {
   process.exit(1);
 }
 

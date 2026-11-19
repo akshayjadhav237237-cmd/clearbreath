@@ -1,4 +1,4 @@
-# ADR 005: Client-Side Persistence, Secure Exports, and Printable Action Plan
+# ADR 005: Client-Side Persistence, Validated Exports, and Printable Action Plan
 
 ## Status
 
@@ -13,7 +13,7 @@ These capabilities introduce security and stability risks:
 - LocalStorage tampering, corrupted payloads, or schema drift across releases can crash client state.
 - Unsanitized spreadsheet exports are vulnerable to CSV Formula Injection attacks.
 - Calendar files must adhere strictly to RFC 5545 specification (CRLF line endings, 75-octet line folding, proper delimiter escaping) to prevent calendar client crashes.
-- Sensitive credentials (e.g., Google Gemini API key) must never be written to persistent storage.
+- Sensitive credentials (e.g., Google Gemini API key) are not written to persistent storage.
 
 ## Decision
 
@@ -24,11 +24,11 @@ These capabilities introduce security and stability risks:
    - A sequential migration pipeline transforms legacy schemas forward (e.g., migration registry supporting v1 to v2 transformations).
    - Payload size guard limits stored strings to 100 KB, preventing quota exhaustion.
    - Any unrecoverable corrupt or foreign JSON resets gracefully to `DEFAULT_HOUSEHOLD_PERSONA` and surfaces a user-visible notice.
-   - **Zero Key Persistence Guarantee**: `ApiKeyHolder` is decoupled from persistence; API keys exist only in volatile runtime memory.
+   - **Memory-Only Key Isolation**: `ApiKeyHolder` is decoupled from persistence; API keys exist only in volatile runtime memory.
 
-2. **Secure Export Engines (`src/exports`)**:
-   - **Formula-Injection-Safe CSV**: Every cell starting with `=`, `+`, `-`, `@`, `\t`, or `\r` is prefixed with a single quote (`'`). Fields with commas, quotes, or newlines are quoted and internal quotes escaped as `""`.
-   - **RFC 5545 Compliant ICS**: Implements strict `\r\n` CRLF endings, 75-octet line folding, delimiter escaping (`\`, `,`, `;`, `\n`), deterministic `IdGenerator` UIDs, `Clock` timestamps, and floating local times (`SUMMARY`, `DTSTART`, `DTEND`, `RRULE:FREQ=DAILY`). Schedules morning ventilation and night purifier runtimes.
+2. **Export Engines (`src/exports`)**:
+   - **Formula-Injection Sanitized CSV**: Every cell starting with `=`, `+`, `-`, `@`, `\t`, or `\r` is prefixed with a single quote (`'`). Fields with commas, quotes, or newlines are quoted and internal quotes escaped as `""`.
+   - **RFC 5545 Conforming ICS**: Implements CRLF endings (`\r\n`), 75-octet line folding, delimiter escaping (`\`, `,`, `;`, `\n`), deterministic `IdGenerator` UIDs, `Clock` timestamps, and floating local times (`SUMMARY`, `DTSTART`, `DTEND`, `RRULE:FREQ=DAILY`). Schedules morning ventilation and night purifier runtimes.
    - **Validated JSON Backup**: Exports household profile JSON with formatting; imports check max file size (50 KB) and validate against domain Zod schema. Browser downloads use Blob URLs immediately revoked after use.
 
 3. **Printable Smog-Day Action Plan (`src/features/print`)**:
@@ -38,6 +38,6 @@ These capabilities introduce security and stability risks:
 
 ## Consequences
 
-- Completely offline-first user state management without external telemetry or servers.
-- Eliminates formula injection and calendar parser incompatibility risks.
+- In-browser user state management without external telemetry or servers.
+- Mitigates formula injection and calendar parser incompatibility risks.
 - Maintains strict 200-line file ceilings, comprehensive unit testing, and full test coverage.
