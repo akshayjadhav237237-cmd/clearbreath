@@ -35,7 +35,7 @@ export function ConfidenceMeter({
       className="flex flex-col gap-1 text-xs text-slate-700 dark:text-slate-300"
       aria-label={label}
     >
-      <div className="flex items-center gap-1.5">
+      <div className="flex items-center gap-[6px]">
         <span className="font-medium text-slate-800 dark:text-slate-200">
           Confidence:
         </span>

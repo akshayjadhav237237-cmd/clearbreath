@@ -56,7 +56,7 @@ export const EN_TRANSLATIONS: AppTranslations = {
     dominant: 'Dominant Pollutant',
     attribution: 'Data powered by Open-Meteo under CC BY 4.0',
     liveBadge: 'Live API',
-    sampleBadge: 'Offline Simulation',
+    sampleBadge: 'Simulated Data',
   },
   plan: {
     title: '24-Hour Diurnal Advisory',
@@ -88,11 +88,11 @@ export const EN_TRANSLATIONS: AppTranslations = {
       'Advisories are grounded strictly in CPCB and EPA models. For medical symptoms, consult a doctor.',
     placeholder: 'Ask about air quality, filters, or commute safety...',
     send: 'Ask',
-    consentToggle: 'Enable Cloud Gemini 1.5 Flash (Zero-PII)',
+    consentToggle: 'Enable Cloud Gemini 2.0 Flash (Allowlist Egress)',
     consentNote:
-      'When disabled, Clearbreath operates 100% offline with deterministic local templates.',
-    modeLocal: 'Local Engine (Offline)',
-    modeGemini: 'Gemini 1.5 Flash (Grounded)',
+      'When disabled, AI is optional; domain engines run in the browser without network calls after the page has loaded.',
+    modeLocal: 'Local Template Engine',
+    modeGemini: 'Gemini 2.0 Flash (Grounded)',
     showFacts: 'Inspect Grounding Facts Passed to AI',
   },
   community: {

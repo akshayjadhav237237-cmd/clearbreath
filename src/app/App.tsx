@@ -44,7 +44,7 @@ function AppHeader(): JSX.Element {
             type="button"
             onClick={toggleTheme}
             aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
-            className="rounded-lg border border-slate-200 p-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
+            className="rounded-lg border border-slate-200 p-[6px] text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             {theme === 'light' ? '🌙' : '☀️'}
           </button>

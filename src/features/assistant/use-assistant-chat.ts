@@ -30,7 +30,7 @@ const DEFAULT_MESSAGE: ChatMessage = {
   source: 'local',
 };
 
-/** Custom hook managing conversational turn state, PII scrubbing, and AI invocation. */
+/** Custom hook managing conversational turn state, context allowlisting, and AI invocation. */
 export function useAssistantChat(options: ChatOptions) {
   const { profile, aqi, city, facts, aiConsent, language } = options;
   const [messages, setMessages] = useState<readonly ChatMessage[]>([

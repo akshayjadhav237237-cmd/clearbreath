@@ -33,10 +33,10 @@ function PrintTable({ actions }: { actions: readonly Action[] }): JSX.Element {
             key={action.id}
             className="border-b border-slate-100 print:border-slate-300"
           >
-            <td className="py-1.5 font-semibold">{action.title}</td>
-            <td className="py-1.5 capitalize">{action.category}</td>
-            <td className="py-1.5">Effort {action.effort}/3</td>
-            <td className="py-1.5">₹{action.costRupees}</td>
+            <td className="py-[6px] font-semibold">{action.title}</td>
+            <td className="py-[6px] capitalize">{action.category}</td>
+            <td className="py-[6px]">Effort {action.effort}/3</td>
+            <td className="py-[6px]">₹{action.costRupees}</td>
           </tr>
         ))}
       </tbody>

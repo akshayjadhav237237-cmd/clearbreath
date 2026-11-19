@@ -76,7 +76,7 @@ export function AssistantHeader({
             id="gemini-key-input"
             type="password"
             aria-label="Gemini API Key"
-            placeholder="Enter API key (in-memory only; never persisted)"
+            placeholder="Enter API key (in-memory only; not persisted)"
             value={apiKey}
             onChange={(e) => onApiKeyChange(e.target.value)}
             className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1 text-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"

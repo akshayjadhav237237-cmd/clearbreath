@@ -63,7 +63,7 @@ export function RecommendationItemCard({
           <button
             type="button"
             onClick={() => onToggle(action.id)}
-            className={`rounded-lg px-3.5 py-1.5 text-xs font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 ${
+            className={`rounded-lg px-3.5 py-[6px] text-xs font-semibold shadow-sm focus:outline-none focus:ring-2 focus:ring-sky-500 ${
               isDone
                 ? 'bg-emerald-600 text-white hover:bg-emerald-700'
                 : 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900'

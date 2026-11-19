@@ -19,7 +19,7 @@ describe('AssistantPanel', () => {
   it('populates and sends pre-canned prompts into chat transcript', async () => {
     render(<AssistantPanel />);
     const promptBtn = screen.getByRole('button', {
-      name: /is it safe for my child to play outside at 4pm\?/i,
+      name: /can my child play outdoors at 4pm\?/i,
     });
     fireEvent.click(promptBtn);
     expect(

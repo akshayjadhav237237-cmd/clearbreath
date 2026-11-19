@@ -18,7 +18,7 @@ function ActionButtons({
   onPrint,
 }: ActionButtonsProps): JSX.Element {
   const btnClass =
-    'rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200';
+    'rounded-lg border border-slate-200 bg-slate-50 px-3 py-[6px] text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200';
 
   return (
     <div className="flex flex-wrap items-center gap-2">
@@ -58,7 +58,7 @@ function ActionButtons({
         type="button"
         onClick={onPrint}
         aria-label="Print Family Plan"
-        className="rounded-lg bg-sky-700 px-3.5 py-1.5 text-xs font-bold text-white hover:bg-sky-800"
+        className="rounded-lg bg-sky-700 px-3.5 py-[6px] text-xs font-bold text-white hover:bg-sky-800"
       >
         Print Family Plan
       </button>

@@ -4,7 +4,7 @@ import type { GroundingFact } from '../../ai/contracts';
 
 /** Pre-canned suggested prompts for user exploration. */
 const PRE_CANNED_PROMPTS = [
-  'Is it safe for my child to play outside at 4pm?',
+  'Can my child play outdoors at 4pm?',
   'How much will a DIY air cleaner reduce indoor PM2.5?',
   'What is the cleanest commute option during severe smog?',
 ] as const;

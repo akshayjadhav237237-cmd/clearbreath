@@ -24,7 +24,7 @@ export function SegmentedControl<T extends string>({
   size = 'md',
 }: SegmentedControlProps<T>): JSX.Element {
   const padClass =
-    size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3.5 py-1.5 text-sm';
+    size === 'sm' ? 'px-2.5 py-1 text-xs' : 'px-3.5 py-[6px] text-sm';
 
   return (
     <div

@@ -25,7 +25,7 @@ export function Tooltip({
       {isVisible ? (
         <span
           role="tooltip"
-          className="absolute bottom-full left-1/2 z-40 mb-1.5 -translate-x-1/2 whitespace-normal rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-1.5 text-xs font-normal text-slate-100 shadow-lg dark:border-slate-600 dark:bg-slate-800"
+          className="absolute bottom-full left-1/2 z-40 mb-[6px] -translate-x-1/2 whitespace-normal rounded-lg border border-slate-700 bg-slate-900 px-2.5 py-[6px] text-xs font-normal text-slate-100 shadow-lg dark:border-slate-600 dark:bg-slate-800"
         >
           {content}
         </span>
