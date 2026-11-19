@@ -27,7 +27,7 @@ export type AiErrorCode =
   | 'consentMissing'
   | 'aborted';
 
-/** Structured, message-safe AI layer error containing no API keys or PII payloads. */
+/** Structured AI layer error containing no API keys or allowlisted data payloads. */
 export interface AiError {
   readonly code: AiErrorCode;
   readonly message: string;

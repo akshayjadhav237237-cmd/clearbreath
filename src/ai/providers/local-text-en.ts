@@ -11,7 +11,7 @@ export const EN_SEVERITY_SUMMARIES: Readonly<Record<AqiCategory, string>> = {
   veryPoor:
     'Severe air pollution. Vulnerable household members must stay indoors.',
   severe:
-    'Hazardous air emergency. Strictly seal indoors and avoid all outdoor exposure.',
+    'Hazardous air emergency. Strictly seal indoors and avoid outdoor exposure.',
 };
 
 /** English caution notes by sensitivity level. */

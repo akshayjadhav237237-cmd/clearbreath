@@ -151,7 +151,7 @@ export class GeminiProvider implements AiProvider {
     };
   }
 
-  /** Maps low-level network or abort errors to safe AiError representations. */
+  /** Maps low-level network or abort errors to structured AiError representations. */
   private mapError(error: unknown): AiError {
     if (error instanceof Error) {
       if (error.name === 'AbortError') {

@@ -23,7 +23,7 @@ export class ApiKeyHolder {
     this.key = null;
   }
 
-  /** Returns a redacted safe representation preventing accidental token leakage. */
+  /** Returns a redacted representation preventing accidental token leakage. */
   toString(): string {
     return this.key !== null
       ? 'ApiKeyHolder[CONFIGURED]'

@@ -21,7 +21,7 @@ import {
 export class LocalProvider implements AiProvider {
   readonly id = 'local' as const;
 
-  /** Synthesizes an explanatory daily narrative from safe context facts. */
+  /** Synthesizes an explanatory daily narrative from allowlisted context facts. */
   async explainPlan(
     ctx: LlmSafeContext
   ): Promise<Result<AiPlanNarrative, AiError>> {

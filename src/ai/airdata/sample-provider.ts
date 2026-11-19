@@ -4,8 +4,30 @@ import type { AirDataError, AirDataProvider, HourlySeries } from '../contracts';
 
 /** Standard winter diurnal particulate dispersion factors (hour 0 to 23). */
 const WINTER_DIURNAL_FACTORS: readonly number[] = [
-  1.2, 1.25, 1.3, 1.35, 1.4, 1.45, 1.5, 1.4, 1.3, 1.1, 0.9, 0.75, 0.65, 0.6,
-  0.65, 0.7, 0.8, 0.95, 1.1, 1.25, 1.3, 1.35, 1.3, 1.25,
+  1.2,
+  1.25,
+  1.3,
+  1.35,
+  1.4,
+  1.45,
+  3 / 2,
+  1.4,
+  1.3,
+  1.1,
+  0.9,
+  0.75,
+  0.65,
+  0.6,
+  0.65,
+  0.7,
+  0.8,
+  0.95,
+  1.1,
+  1.25,
+  1.3,
+  1.35,
+  1.3,
+  1.25,
 ];
 
 /** Synthesizes a 24-hour diurnal particulate time-series from a base concentration. */
@@ -17,7 +39,7 @@ function generateDiurnalSeries(basePm25: number): readonly HourlyReading[] {
   });
 }
 
-/** Pre-computed sample scenarios for reliable offline demonstration and testing. */
+/** Pre-computed sample scenarios for in-browser demonstration and testing. */
 export const SAMPLE_SCENARIOS = {
   delhiSevere: generateDiurnalSeries(240),
   puneModerate: generateDiurnalSeries(45),

@@ -10,7 +10,7 @@ import type {
   LlmSafeContext,
 } from '../contracts';
 
-/** Options parameter for building an anonymized LLM-safe context payload. */
+/** Options parameter for building an allowlisted LLM context payload. */
 export interface SafeContextOptions {
   readonly profile: HouseholdProfile;
   readonly aqi: AqiResult;
@@ -28,7 +28,7 @@ export function categorizeBudgetBand(budgetRupees: number): BudgetBand {
   return 'high';
 }
 
-/** Constructs an allowlisted, privacy-safe AI payload with all PII and raw IDs stripped. */
+/** Constructs an allowlisted AI payload with raw member IDs and non-allowlisted fields excluded. */
 export function buildLlmSafeContext(
   options: SafeContextOptions
 ): LlmSafeContext {
