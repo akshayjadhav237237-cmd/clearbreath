@@ -4,17 +4,17 @@ Empirical verification audit conducted on 2026-11-19.
 
 ## 1. Automated Verification Suite Summary
 
-| Check Category           | Command                             | Empirical Result                                           | Gate Status |
-| :----------------------- | :---------------------------------- | :--------------------------------------------------------- | :---------- |
-| TypeScript Typecheck     | `npm run typecheck`                 | 0 errors (`tsc -b --noEmit`)                               | PASS        |
-| ESLint (Flat Config)     | `npm run lint`                      | 0 errors, 0 warnings (194 files)                           | PASS        |
-| Prettier Formatting      | `npm run format:check`              | Clean format check (LF, 2 spaces)                          | PASS        |
-| Knip Hygiene Scan        | `npm run knip`                      | 0 unused files, deps, or exports                           | PASS        |
-| Code Duplication (JSCPD) | `npm run dup`                       | 0.00% duplicate tokens (0 clones)                          | PASS        |
-| Bundle Budget            | `npm run bundle:check`              | JS Gzip: 69.87 kB (<75 kB), CSS: 5.34 kB (<20 kB)          | PASS        |
-| Unit & Integration Tests | `npm run test:coverage`             | 47 test suites, 301 tests passed                           | PASS        |
-| Real Chromium E2E Tests  | `npm run e2e`                       | 4 spec files, 17 tests passed                              | PASS        |
-| Lighthouse Mobile Audit  | `lighthouse http://localhost:4174/` | 99 / 100 / 100 / 100 (live), 100 / 100 / 100 / 100 (local) | PASS        |
+| Check Category           | Command                     | Empirical Result                                           | Gate Status |
+| :----------------------- | :-------------------------- | :--------------------------------------------------------- | :---------- |
+| TypeScript Typecheck     | `npm run typecheck`         | 0 errors (`tsc -b --noEmit`)                               | PASS        |
+| ESLint (Flat Config)     | `npm run lint`              | 0 errors, 0 warnings (194 files)                           | PASS        |
+| Prettier Formatting      | `npm run format:check`      | Clean format check (LF, 2 spaces)                          | PASS        |
+| Knip Hygiene Scan        | `npm run knip`              | 0 unused files, deps, or exports                           | PASS        |
+| Code Duplication (JSCPD) | `npm run dup`               | 0.00% duplicate tokens (0 clones)                          | PASS        |
+| Bundle Budget            | `npm run bundle:check`      | JS Gzip: 69.88 kB (<75 kB), CSS: 5.34 kB (<20 kB)          | PASS        |
+| Unit & Integration Tests | `npm run test:coverage`     | 47 test suites, 301 tests passed                           | PASS        |
+| Real Chromium E2E Tests  | `npm run e2e`               | 4 spec files, 17 tests passed                              | PASS        |
+| Lighthouse Mobile Audit  | `npx lighthouse <live-url>` | 100 / 100 / 100 / 100 (live median), 100 / 100 / 100 / 100 | PASS        |
 
 ## 2. Test Coverage Metrics
 
@@ -57,9 +57,9 @@ Verified using Playwright against production build:
 
 ## 4. Mobile Lighthouse Audit
 
-Audited via Google Lighthouse 13.5 in headless Chromium:
+Audited via Google Lighthouse 13.5 in headless Chromium across 3 mobile runs on 2026-11-19:
 
-- **Performance**: 99 / 100 (live remote), 100 / 100 (local preview)
+- **Performance**: 100 / 100 (live remote median: 97, 100, 100), 100 / 100 (local preview)
 - **Accessibility**: 100 / 100
 - **Best Practices**: 100 / 100
 - **SEO**: 100 / 100
