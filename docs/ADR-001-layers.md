@@ -12,14 +12,14 @@ Clearbreath requires a robust and maintainable architecture separating core doma
 
 We enforce a strict Clean Architecture layered organization with explicit inward dependency flow:
 
-- `src/domain`: Core domain models, entities, value objects, and pure business rules. It has zero external dependencies.
+- `src/domain`: Core domain models, entities, value objects, and pure business rules. It has 0 external dependencies.
 - `src/shared`: Cross-cutting utility primitives including `Result<T, E>`, type guards, and core ports (e.g., Clock, IdGenerator).
 - `src/config`: Static configuration values, environment constants, and Content Security Policy directives.
 - `src/ai`: AI ports, prompt templates, and adapter implementations for Gemini LLM integration.
 - `src/features`: Vertical slices encapsulating feature-specific state, components, and workflows.
 - `src/app`: Top-level application shell, routing, and composition root wiring dependencies.
 
-Dependencies must strictly point inward. Domain and shared modules never import from features or app modules.
+Dependencies must strictly point inward. Domain and shared modules do not import from features or app modules; verified by tests/layers.test.ts.
 
 ## Consequences
 

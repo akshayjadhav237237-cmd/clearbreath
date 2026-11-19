@@ -10,7 +10,7 @@ Unhandled runtime exceptions cause unpredictable application failures, missing e
 
 ## Decision
 
-We adopt a typed `Result<T, E>` pattern for all operations that may fail across architectural boundaries:
+We adopt a typed `Result<T, E>` pattern for operations that may fail across architectural boundaries:
 
 - A `Result<T, E>` represents either a successful outcome `Ok<T>` or a domain-specific failure `Err<E>`.
 - Domain operations, parsers, and external adapters must return `Result<T, E>` rather than throwing exceptions.

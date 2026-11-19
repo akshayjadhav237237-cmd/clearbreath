@@ -32,10 +32,10 @@ max 200 lines per file; max 60 lines per function (90 TSX); complexity 10; max 4
 
 ## Unattended Operation
 
-- Never ask questions.
+- Do not ask questions.
 - Record assumptions in docs/ASSUMPTIONS.md.
 - Revert changes after 3 failed fixes on one problem.
-- Never leave main red.
+- Do not leave main red.
 - Kill processes started during execution.
 - No stray files in repo.
 - No push after submission.

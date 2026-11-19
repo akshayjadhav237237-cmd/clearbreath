@@ -30,7 +30,7 @@ graph TD
   B --> C[Grounding Facts & Allowlist Context Builder]
   C --> D{User Consent?}
   D -- No / Local Only --> E[Deterministic Local Template Engine]
-  D -- Yes + Key --> F[Gemini 2.0 Flash Grounded Invoker]
+  D -- Yes + Key --> F[Gemini 3.5 Flash Grounded Invoker]
   E --> G[Zustand Store & Persistence Layer]
   F --> G
   G --> H[Vertical Feature Panels: AirNow, Plan, Actions, Compare, Assistant, Community]
@@ -67,8 +67,8 @@ AI is optional; domain engines run in the browser without network calls after th
 | **Code Quality**      | $\le 200$ lines/file, $\le 60$ lines/fn, 0 `any`, 0 `!`, 0 duplicates  | `npm run check`, `npm run dup`                            |
 | **Problem Alignment** | CPCB AQI, mass-balance infiltration, dose calculations                 | `src/domain/`, `src/features/`                            |
 | **Security**          | Allowlist egress, strict CSP, memory-only key isolation                | `e2e/privacy.spec.ts`, `tests/ai/privacy/privacy.test.ts` |
-| **Efficiency**        | Initial JS $< 100$ kB gzip, in-browser engine execution                | `scripts/check-bundle.mjs`                                |
-| **Testing**           | 46 test suites, 295 unit tests, 13 real Chromium E2E                   | `npm run test:coverage`, `npm run e2e`                    |
+| **Efficiency**        | Initial JS $< 75$ kB gzip, in-browser engine execution                 | `scripts/check-bundle.mjs`                                |
+| **Testing**           | 47 test suites, 301 unit tests, 17 real Chromium E2E                   | `npm run test:coverage`, `npm run e2e`                    |
 | **Accessibility**     | automated axe-core checks in Chromium found 0 violations on 2026-11-19 | `e2e/a11y.spec.ts`, `docs/VERIFICATION.md`                |
 
 ## Commands

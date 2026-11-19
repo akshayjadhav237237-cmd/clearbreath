@@ -10,7 +10,7 @@ Clearbreath leverages Generative AI (Gemini) to synthesize personalized smog adv
 
 ## Decision
 
-We apply the Ports and Adapters (Hexagonal Architecture) pattern for all AI capabilities:
+We apply the Ports and Adapters (Hexagonal Architecture) pattern for AI capabilities:
 
 - Port contracts are defined in `src/ai/ports/` (e.g., `AiAdvisoryPort`) defining required request/response shapes using domain models and Result types.
 - Production adapters are implemented in `src/ai/adapters/gemini/` using the official client SDK and prompt templates.

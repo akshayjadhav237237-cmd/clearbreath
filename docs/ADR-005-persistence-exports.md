@@ -18,7 +18,7 @@ These capabilities introduce security and stability risks:
 ## Decision
 
 1. **Versioned Storage Architecture (`src/persistence`)**:
-   - All client persistence is mediated through the injected `StoragePort` interface using a namespaced key (`clearbreath_state_v1`).
+   - Client persistence is mediated through the injected `StoragePort` interface using a namespaced key (`clearbreath_state_v1`).
    - State payloads include an explicit schema version integer (`version: 1`).
    - Loading parses data against strict Zod schemas (`persistedStateV1Schema`).
    - A sequential migration pipeline transforms legacy schemas forward (e.g., migration registry supporting v1 to v2 transformations).
