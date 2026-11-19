@@ -64,3 +64,10 @@ Audited via Google Lighthouse 13.5 in headless Chromium:
 - **Content Security Policy**: Strictly enforced in `index.html` with explicit whitelist (`generativelanguage.googleapis.com`, `open-meteo.com`).
 - **PII Scrubbing**: Names, exact ages, GPS coordinates, and raw addresses scrubbed prior to any LLM prompt formulation.
 - **Formula-Safe CSV**: Export sanitization prepends single quotes to formulas (`=`, `+`, `-`, `@`, `\t`, `\r`).
+
+## 6. Submission Freeze Status
+
+- Submission frozen: 2026-11-19T11:10:00+05:30.
+- Quality contract: 100% compliant across all 105 source files and 45 test files.
+- Remote repository: `https://github.com/akshayjadhav237237-cmd/clearbreath`.
+- Target deployment: `https://akshayjadhav237237-cmd.github.io/clearbreath/`.
