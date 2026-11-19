@@ -18,3 +18,5 @@ export {
 export { DEFAULT_HOUSEHOLD_PERSONA } from './persona';
 export type { CityCoordinate } from './cities';
 export { CITIES, CITIES_BY_ID, getCityById } from './cities';
+export type { PresetKey } from './presets';
+export { PRESETS } from './presets';

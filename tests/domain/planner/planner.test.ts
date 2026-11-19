@@ -128,4 +128,19 @@ describe('Planner input validation and sensitivity thresholds', () => {
       expect(lowRes.value.outdoorWindows.length).toBeGreaterThan(0);
     }
   });
+
+  it('selects 1-hour ventilation window when only a single hour is acceptable', () => {
+    const readings: HourlyReading[] = Array.from({ length: 24 }, (_, h) => ({
+      hour: h,
+      pm25: h === 13 ? 45 : 220,
+      pm10: h === 13 ? 80 : 350,
+    }));
+    const result = generateDailyPlan(readings, 'low', DEFAULT_LIFESTYLE);
+    expect(result.ok).toBe(true);
+    if (!result.ok) return;
+    expect(result.value.bestVentilationWindow).toEqual({
+      startHour: 13,
+      endHour: 14,
+    });
+  });
 });
