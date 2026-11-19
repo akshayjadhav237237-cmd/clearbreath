@@ -50,6 +50,7 @@ export function AssistantPanel(): JSX.Element {
       facts,
       aiConsent,
       language,
+      apiKey,
     });
 
   return (

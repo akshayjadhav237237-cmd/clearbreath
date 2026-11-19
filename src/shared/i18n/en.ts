@@ -88,11 +88,11 @@ export const EN_TRANSLATIONS: AppTranslations = {
       'Advisories are grounded strictly in CPCB and EPA models. For medical symptoms, consult a doctor.',
     placeholder: 'Ask about air quality, filters, or commute safety...',
     send: 'Ask',
-    consentToggle: 'Enable Cloud Gemini 2.0 Flash (Allowlist Egress)',
+    consentToggle: 'Enable Cloud Gemini 3.5 Flash (Allowlist Egress)',
     consentNote:
       'When disabled, AI is optional; domain engines run in the browser without network calls after the page has loaded.',
     modeLocal: 'Local Template Engine',
-    modeGemini: 'Gemini 2.0 Flash (Grounded)',
+    modeGemini: 'Gemini 3.5 Flash (Grounded)',
     showFacts: 'Inspect Grounding Facts Passed to AI',
   },
   community: {

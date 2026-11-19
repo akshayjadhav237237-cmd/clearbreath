@@ -21,6 +21,7 @@ interface ChatOptions {
   readonly facts: readonly GroundingFact[];
   readonly aiConsent: boolean;
   readonly language: Language;
+  readonly apiKey?: string;
 }
 
 const DEFAULT_MESSAGE: ChatMessage = {
@@ -32,7 +33,7 @@ const DEFAULT_MESSAGE: ChatMessage = {
 
 /** Custom hook managing conversational turn state, context allowlisting, and AI invocation. */
 export function useAssistantChat(options: ChatOptions) {
-  const { profile, aqi, city, facts, aiConsent, language } = options;
+  const { profile, aqi, city, facts, aiConsent, language, apiKey } = options;
   const [messages, setMessages] = useState<readonly ChatMessage[]>([
     DEFAULT_MESSAGE,
   ]);
@@ -57,9 +58,13 @@ export function useAssistantChat(options: ChatOptions) {
       question: qText,
       language,
     });
+    const keyHolder = new ApiKeyHolder();
+    if (apiKey) {
+      keyHolder.setKey(apiKey);
+    }
     const orchestrator = new AiOrchestrator({
       localProvider: new LocalProvider(),
-      keyHolder: new ApiKeyHolder(),
+      keyHolder,
       fetcher: new SystemFetchPort(),
       sleepPort: new SystemSleepPort(),
       randomPort: new SystemRandomPort(),
@@ -68,16 +73,19 @@ export function useAssistantChat(options: ChatOptions) {
     const res = await orchestrator.getAnswer(safeCtx, { consent: aiConsent });
     setIsLoading(false);
     if (res.ok) {
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: String(Date.now() + 1),
-          sender: 'assistant',
-          text: res.value.data.answer,
-          source: res.value.source,
-          refusal: res.value.data.refusal,
-        },
-      ]);
+      const msg: ChatMessage = {
+        id: String(Date.now() + 1),
+        sender: 'assistant',
+        text: res.value.data.answer,
+        source: res.value.source,
+        ...(res.value.data.refusal !== undefined
+          ? { refusal: res.value.data.refusal }
+          : {}),
+        ...(res.value.fallbackReason !== undefined
+          ? { fallbackReason: res.value.fallbackReason }
+          : {}),
+      };
+      setMessages((prev) => [...prev, msg]);
     }
   };
 

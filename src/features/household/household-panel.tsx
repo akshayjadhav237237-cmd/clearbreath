@@ -3,11 +3,8 @@ import { useAppStore } from '../../app/store';
 import { determineHouseholdSensitivity } from '../../domain/profile';
 import { Badge, SegmentedControl, type BadgeSeverity } from '../../shared/ui';
 import { getTranslations } from '../../shared/i18n';
-import type {
-  HomeProfile,
-  Member,
-  SensitivityLevel,
-} from '../../domain/contracts';
+import type { Member, SensitivityLevel } from '../../domain/contracts';
+import { HouseholdHomeSpecs } from './household-specs';
 
 function getSensitivitySeverity(level: SensitivityLevel): BadgeSeverity {
   if (level === 'high') return 'severe';
@@ -48,65 +45,10 @@ function HouseholdMembersList({
   );
 }
 
-function HouseholdHomeSpecs({
-  home,
-  budgetRupees,
-  title,
-}: {
-  readonly home: HomeProfile;
-  readonly budgetRupees: number;
-  readonly title: string;
-}): JSX.Element {
-  return (
-    <article className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <h3 className="text-sm font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-        {title}
-      </h3>
-      <div className="grid grid-cols-2 gap-4 text-xs">
-        <div>
-          <span className="text-slate-700 dark:text-slate-300">Home Type</span>
-          <p className="mt-1 font-semibold capitalize text-slate-900 dark:text-slate-100">
-            {home.type}
-          </p>
-        </div>
-        <div>
-          <span className="text-slate-700 dark:text-slate-300">Floor Area</span>
-          <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
-            {home.floorAreaM2} m²
-          </p>
-        </div>
-        <div>
-          <span className="text-slate-700 dark:text-slate-300">
-            Building Sealing
-          </span>
-          <p className="mt-1 font-semibold capitalize text-slate-900 dark:text-slate-100">
-            {home.sealing}
-          </p>
-        </div>
-        <div>
-          <span className="text-slate-700 dark:text-slate-300">
-            Cooking Fuel
-          </span>
-          <p className="mt-1 font-semibold uppercase text-slate-900 dark:text-slate-100">
-            {home.cookingFuel}
-          </p>
-        </div>
-      </div>
-      <div className="border-t border-slate-100 pt-3 text-xs dark:border-slate-800">
-        <span className="text-slate-700 dark:text-slate-300">
-          Monthly Mitigation Budget
-        </span>
-        <p className="mt-1 font-mono text-base font-bold text-slate-900 dark:text-slate-50">
-          ₹{budgetRupees.toLocaleString('en-IN')}
-        </p>
-      </div>
-    </article>
-  );
-}
-
 /** Interactive household demographic and living envelope profile configuration panel. */
 export function HouseholdPanel(): JSX.Element {
-  const { profile, activePreset, loadPreset, language } = useAppStore();
+  const { profile, setProfile, activePreset, loadPreset, language } =
+    useAppStore();
   const t = getTranslations(language);
   const sensitivity = determineHouseholdSensitivity(profile.members);
 
@@ -169,6 +111,12 @@ export function HouseholdPanel(): JSX.Element {
           home={profile.home}
           budgetRupees={profile.lifestyle.budgetRupees}
           title={t.household.homeTitle}
+          onBudgetChange={(newBudget) =>
+            setProfile({
+              ...profile,
+              lifestyle: { ...profile.lifestyle, budgetRupees: newBudget },
+            })
+          }
         />
       </div>
     </section>

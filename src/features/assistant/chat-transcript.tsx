@@ -16,6 +16,7 @@ export interface ChatMessage {
   readonly text: string;
   readonly source?: 'local' | 'gemini';
   readonly refusal?: boolean;
+  readonly fallbackReason?: string;
 }
 
 function getBubbleStyle(
@@ -48,6 +49,11 @@ function ChatTranscript({
             className={`max-w-[85%] rounded-2xl px-4 py-2 text-xs sm:text-sm ${getBubbleStyle(m.sender, m.refusal)}`}
           >
             <p>{m.text}</p>
+            {m.fallbackReason === 'modelUnavailable' ? (
+              <span className="mt-1 block text-[11px] font-medium text-amber-800 dark:text-amber-200">
+                AI model unavailable, local guidance shown.
+              </span>
+            ) : null}
             {m.source ? (
               <span className="mt-1 block text-[10px] text-slate-700 dark:text-slate-300">
                 Source: {m.source} engine

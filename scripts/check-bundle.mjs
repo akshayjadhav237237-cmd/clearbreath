@@ -17,7 +17,7 @@ function getGzipSize(filePath) {
 const assetsDir = path.join(distDir, 'assets');
 const assetFiles = fs.readdirSync(assetsDir);
 
-const MAX_INITIAL_JS_GZIP = 100 * 1024;
+const MAX_INITIAL_JS_GZIP = 75 * 1024;
 const MAX_LAZY_CHUNK_GZIP = 40 * 1024;
 const MAX_CSS_GZIP = 20 * 1024;
 
@@ -39,9 +39,7 @@ for (const file of assetFiles) {
   } else if (file.endsWith('.js')) {
     const isInitial = file.startsWith('index-');
     const budget = isInitial ? MAX_INITIAL_JS_GZIP : MAX_LAZY_CHUNK_GZIP;
-    const budgetLabel = isInitial
-      ? '100 kB (Initial JS)'
-      : '40 kB (Lazy Chunk)';
+    const budgetLabel = isInitial ? '75 kB (Initial JS)' : '40 kB (Lazy Chunk)';
     process.stdout.write(
       `- JS (${file}): ${gzKb} kB (Budget: ${budgetLabel})\n`
     );

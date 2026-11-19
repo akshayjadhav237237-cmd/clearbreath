@@ -1,17 +1,30 @@
-import type { JSX } from 'react';
+import { lazy, Suspense, type JSX } from 'react';
 import { useAppStore, type NavigationTab } from './store';
 import { APP_NAME } from '../config/constants';
 import { getTranslations } from '../shared/i18n';
-import { Toast, SegmentedControl } from '../shared/ui';
-import {
-  AirNowPanel,
-  AssistantPanel,
-  CommunityPanel,
-  ComparePanel,
-  HouseholdPanel,
-  PlanPanel,
-  RecommendationsPanel,
-} from '../features';
+import { Toast, SegmentedControl, ErrorBoundary } from '../shared/ui';
+import { AirNowPanel } from '../features/air-now';
+
+const HouseholdPanel = lazy(() =>
+  import('../features/household').then((m) => ({ default: m.HouseholdPanel }))
+);
+const PlanPanel = lazy(() =>
+  import('../features/plan').then((m) => ({ default: m.PlanPanel }))
+);
+const RecommendationsPanel = lazy(() =>
+  import('../features/recommendations').then((m) => ({
+    default: m.RecommendationsPanel,
+  }))
+);
+const ComparePanel = lazy(() =>
+  import('../features/compare').then((m) => ({ default: m.ComparePanel }))
+);
+const AssistantPanel = lazy(() =>
+  import('../features/assistant').then((m) => ({ default: m.AssistantPanel }))
+);
+const CommunityPanel = lazy(() =>
+  import('../features/community').then((m) => ({ default: m.CommunityPanel }))
+);
 
 /** Header component presenting application branding, bilingual controls, and theme toggle. */
 function AppHeader(): JSX.Element {
@@ -115,13 +128,27 @@ export function App(): JSX.Element {
         tabIndex={-1}
         className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6"
       >
-        {activeTab === 'airNow' && <AirNowPanel />}
-        {activeTab === 'household' && <HouseholdPanel />}
-        {activeTab === 'plan' && <PlanPanel />}
-        {activeTab === 'actions' && <RecommendationsPanel />}
-        {activeTab === 'compare' && <ComparePanel />}
-        {activeTab === 'assistant' && <AssistantPanel />}
-        {activeTab === 'community' && <CommunityPanel />}
+        <ErrorBoundary>
+          <Suspense
+            fallback={
+              <div
+                role="status"
+                aria-live="polite"
+                className="p-8 text-center text-xs text-slate-700 dark:text-slate-300"
+              >
+                Loading view...
+              </div>
+            }
+          >
+            {activeTab === 'airNow' && <AirNowPanel />}
+            {activeTab === 'household' && <HouseholdPanel />}
+            {activeTab === 'plan' && <PlanPanel />}
+            {activeTab === 'actions' && <RecommendationsPanel />}
+            {activeTab === 'compare' && <ComparePanel />}
+            {activeTab === 'assistant' && <AssistantPanel />}
+            {activeTab === 'community' && <CommunityPanel />}
+          </Suspense>
+        </ErrorBoundary>
       </main>
       <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
         <p>
