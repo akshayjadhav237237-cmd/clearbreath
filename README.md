@@ -68,7 +68,7 @@ AI is optional; domain engines run in the browser without network calls after th
 | **Problem Alignment** | CPCB AQI, mass-balance infiltration, dose calculations                 | `src/domain/`, `src/features/`                            |
 | **Security**          | Allowlist egress, strict CSP, memory-only key isolation                | `e2e/privacy.spec.ts`, `tests/ai/privacy/privacy.test.ts` |
 | **Efficiency**        | Initial JS $< 100$ kB gzip, in-browser engine execution                | `scripts/check-bundle.mjs`                                |
-| **Testing**           | 45 test suites, 293 unit tests, 13 real Chromium E2E                   | `npm run test:coverage`, `npm run e2e`                    |
+| **Testing**           | 46 test suites, 295 unit tests, 13 real Chromium E2E                   | `npm run test:coverage`, `npm run e2e`                    |
 | **Accessibility**     | automated axe-core checks in Chromium found 0 violations on 2026-11-19 | `e2e/a11y.spec.ts`, `docs/VERIFICATION.md`                |
 
 ## Commands
