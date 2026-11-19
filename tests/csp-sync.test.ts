@@ -12,7 +12,7 @@ import {
 describe('Configuration values', () => {
   it('exposes defined app constants', () => {
     expect(APP_NAME).toBe('Clearbreath');
-    expect(GEMINI_MODEL_ID).toBe('gemini-1.5-flash');
+    expect(GEMINI_MODEL_ID).toBe('gemini-2.0-flash');
     expect(STORAGE_KEYS.SETTINGS).toBe('clearbreath_settings_v1');
     expect(DEFAULT_HOUSEHOLD_PERSONA.members).toHaveLength(3);
   });

@@ -24,7 +24,7 @@ import {
 describe('Global configuration constants and exports', () => {
   it('exposes defined application metadata and model identifiers', () => {
     expect(APP_NAME).toBe('Clearbreath');
-    expect(GEMINI_MODEL_ID).toBe('gemini-1.5-flash');
+    expect(GEMINI_MODEL_ID).toBe('gemini-2.0-flash');
     expect(GEMINI_ENDPOINT_BASE).toContain('generativelanguage.googleapis.com');
   });
 

@@ -2,7 +2,7 @@
 export const APP_NAME = 'Clearbreath';
 
 /** Default Gemini model identifier (GA, free-tier callable). */
-export const GEMINI_MODEL_ID = 'gemini-1.5-flash';
+export const GEMINI_MODEL_ID = 'gemini-2.0-flash';
 
 /** Base REST endpoint for Google Generative Language API. */
 export const GEMINI_ENDPOINT_BASE =
