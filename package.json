@@ -1,6 +1,26 @@
 {
   "name": "clearbreath",
   "version": "0.1.0",
+  "description": "GenAI-powered urban air quality advisory assistant for families navigating severe winter smog episodes",
+  "author": "Akshay Jadhav",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/akshayjadhav237237-cmd/clearbreath.git"
+  },
+  "bugs": {
+    "url": "https://github.com/akshayjadhav237237-cmd/clearbreath/issues"
+  },
+  "homepage": "https://akshayjadhav237237-cmd.github.io/clearbreath/",
+  "keywords": [
+    "air-quality",
+    "smog",
+    "genai",
+    "delhi-ncr",
+    "pm25",
+    "cpcb",
+    "clean-air"
+  ],
   "private": true,
   "type": "module",
   "engines": {
