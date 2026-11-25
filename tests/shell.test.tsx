@@ -41,12 +41,17 @@ describe('App shell', () => {
 
   it('toggles theme between light and dark modes', () => {
     render(<App />);
-    const themeBtn = screen.getByRole('button', {
+    const toDarkBtn = screen.getByRole('button', {
       name: /switch to dark theme/i,
     });
-    fireEvent.click(themeBtn);
-    expect(
-      screen.getByRole('button', { name: /switch to light theme/i })
-    ).toBeDefined();
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
+    fireEvent.click(toDarkBtn);
+    expect(document.documentElement.classList.contains('dark')).toBe(true);
+    const toLightBtn = screen.getByRole('button', {
+      name: /switch to light theme/i,
+    });
+    expect(toLightBtn).toBeDefined();
+    fireEvent.click(toLightBtn);
+    expect(document.documentElement.classList.contains('dark')).toBe(false);
   });
 });

@@ -45,8 +45,11 @@ test.describe('Privacy and Zero-PII Egress Verification', () => {
     );
     expect(geminiRequests).toEqual([]);
 
-    // Assert zero CSP violations
-    const cspErrors = consoleErrors.filter((msg) => msg.includes('Refused to'));
+    // Assert zero CSP violations or invalid CSP directive errors
+    const cspErrors = consoleErrors.filter(
+      (msg) =>
+        msg.includes('Refused to') || msg.includes('Content Security Policy')
+    );
     expect(cspErrors).toEqual([]);
   });
 });

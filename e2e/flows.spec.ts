@@ -81,3 +81,27 @@ test.describe('E2E Storage Persistence and Recovery', () => {
     await expect(citySelect).toHaveValue('Gurugram');
   });
 });
+
+const BG_PROP = 'background-color';
+const LIGHT_BG = 'rgb(248, 250, 252)';
+const DARK_BG = 'rgb(2, 6, 23)';
+
+test.describe('E2E Theme Switching', () => {
+  test('switches between light and dark themes even under OS dark preference', async ({
+    page,
+  }) => {
+    await page.emulateMedia({ colorScheme: 'dark' });
+    await page.goto('/');
+
+    const rootShell = page.locator('#root > div');
+    await expect(rootShell).toHaveCSS(BG_PROP, LIGHT_BG);
+
+    await page.getByRole('button', { name: /switch to dark theme/i }).click();
+    await expect(page.locator('html')).toHaveClass(/\bdark\b/);
+    await expect(rootShell).toHaveCSS(BG_PROP, DARK_BG);
+
+    await page.getByRole('button', { name: /switch to light theme/i }).click();
+    await expect(page.locator('html')).not.toHaveClass(/\bdark\b/);
+    await expect(rootShell).toHaveCSS(BG_PROP, LIGHT_BG);
+  });
+});
