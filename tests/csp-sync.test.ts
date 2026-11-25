@@ -30,4 +30,18 @@ describe('Content Security Policy synchronization', () => {
     const policyInHtml = match ? match[1] : '';
     expect(policyInHtml).toBe(CSP_POLICY);
   });
+
+  it('keeps vercel.json HTTP CSP header aligned with CSP_POLICY plus frame-ancestors', () => {
+    const vercelPath = path.resolve(process.cwd(), 'vercel.json');
+    const raw = fs.readFileSync(vercelPath, 'utf-8');
+    const parsed = JSON.parse(raw) as {
+      headers?: Array<{
+        headers?: Array<{ key: string; value: string }>;
+      }>;
+    };
+    const cspHeader = parsed.headers?.[0]?.headers?.find(
+      (h) => h.key === 'Content-Security-Policy'
+    );
+    expect(cspHeader?.value).toBe(`${CSP_POLICY}; frame-ancestors 'none'`);
+  });
 });
