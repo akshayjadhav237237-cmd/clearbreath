@@ -1,4 +1,4 @@
-import { lazy, Suspense, type JSX } from 'react';
+import { lazy, Suspense, useEffect, type JSX } from 'react';
 import { useAppStore, type NavigationTab } from './store';
 import { APP_NAME } from '../config/constants';
 import { getTranslations } from '../shared/i18n';
@@ -111,10 +111,12 @@ function AppNav(): JSX.Element {
 export function App(): JSX.Element {
   const { activeTab, toastMessage, hideToast, theme } = useAppStore();
 
+  useEffect(() => {
+    document.documentElement.classList.toggle('dark', theme === 'dark');
+  }, [theme]);
+
   return (
-    <div
-      className={`min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 ${theme === 'dark' ? 'dark' : ''}`}
-    >
+    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-sky-700 focus:px-4 focus:py-2 focus:text-white"
