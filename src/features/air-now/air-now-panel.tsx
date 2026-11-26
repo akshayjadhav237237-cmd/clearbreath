@@ -1,9 +1,10 @@
 import { useEffect, type JSX } from 'react';
-import { useAppStore } from '../../app/store';
-import { CITIES } from '../../config/cities';
+import { useShallow } from 'zustand/react/shallow';
+import { AIR_DATA_TIMEOUT_MS } from '../../config';
+import { useAppStore, type AppState } from '../../app/store';
 import { calculateAqi, getAqiGuidance } from '../../domain/aqi';
 import { determineHouseholdSensitivity } from '../../domain/profile';
-import { Badge, MetricCard } from '../../shared/ui';
+import { MetricCard } from '../../shared/ui';
 import { getTranslations } from '../../shared/i18n';
 import { fetchAirDataWithFallback } from '../../ai/airdata/fallback-chain';
 import { OpenMeteoProvider } from '../../ai/airdata/open-meteo-provider';
@@ -11,70 +12,7 @@ import { SampleProvider } from '../../ai/airdata/sample-provider';
 import { SystemClock, SystemFetchPort } from '../../shared/system-ports';
 import { OPEN_METEO_ATTRIBUTION_TEXT } from '../../config/constants';
 import type { AqiResult, HourlyReading } from '../../domain/contracts';
-
-interface AirNowHeaderProps {
-  readonly selectedCity: string;
-  readonly onSelectCity: (city: string) => void;
-  readonly aqi: AqiResult;
-  readonly isSample: boolean;
-  readonly guidance: string;
-  readonly t: ReturnType<typeof getTranslations>;
-}
-
-function AirNowHeader({
-  selectedCity,
-  onSelectCity,
-  aqi,
-  isSample,
-  guidance,
-  t,
-}: AirNowHeaderProps): JSX.Element {
-  return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h2
-            id="airnow-heading"
-            className="text-xl font-bold text-slate-900 dark:text-slate-50"
-          >
-            {t.airNow.title} — {selectedCity}
-          </h2>
-          <div className="mt-2 flex items-center gap-2">
-            <Badge severity={aqi.category} size="md">
-              {aqi.category.toUpperCase()} (AQI {aqi.value})
-            </Badge>
-            <Badge severity={isSample ? 'neutral' : 'info'}>
-              {isSample ? t.airNow.sampleBadge : t.airNow.liveBadge}
-            </Badge>
-          </div>
-        </div>
-        <div>
-          <label
-            htmlFor="city-select"
-            className="block text-xs font-semibold text-slate-700 dark:text-slate-300"
-          >
-            {t.airNow.citySelect}
-          </label>
-          <select
-            id="city-select"
-            value={selectedCity}
-            onChange={(e) => onSelectCity(e.target.value)}
-            className="mt-1 rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-900 shadow-sm focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100"
-          >
-            {CITIES.map((c) => (
-              <option key={c.id} value={c.name}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </div>
-      </div>
-      <p className="mt-4 text-xs font-medium text-slate-700 dark:text-slate-300">
-        {guidance}
-      </p>
-    </div>
-  );
-}
+import { AirNowHeader } from './air-now-header';
 
 interface MetricsProps {
   readonly currentReading: HourlyReading;
@@ -107,6 +45,55 @@ function AirNowMetrics({ currentReading, aqi, t }: MetricsProps): JSX.Element {
 }
 
 /** Interactive ambient air quality monitoring panel showing diurnal particulates and CPCB indices. */
+async function fetchCitySeries(city: string, signal: AbortSignal) {
+  const live = new OpenMeteoProvider(new SystemFetchPort(), new SystemClock());
+  const sample = new SampleProvider(
+    city === 'Delhi' ? 'delhiSevere' : 'puneModerate'
+  );
+  return fetchAirDataWithFallback(live, sample, city, signal);
+}
+
+function useAirNowLoader(
+  selectedCity: string,
+  setAirDataLoading: AppState['setAirDataLoading'],
+  setHourlySeries: AppState['setHourlySeries']
+): void {
+  useEffect(() => {
+    const cached = useAppStore.getState().hourlySeries;
+    if (cached && !cached.isSample && cached.city === selectedCity) {
+      return;
+    }
+    let unmounted = false;
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => {
+      controller.abort(
+        new DOMException('Air data request timed out.', 'TimeoutError')
+      );
+    }, AIR_DATA_TIMEOUT_MS);
+
+    async function loadData(): Promise<void> {
+      setAirDataLoading(true);
+      try {
+        const res = await fetchCitySeries(selectedCity, controller.signal);
+        if (!unmounted) {
+          setAirDataLoading(false);
+          if (res.ok) setHourlySeries(res.value.series);
+        }
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+    }
+
+    void loadData();
+    return () => {
+      unmounted = true;
+      window.clearTimeout(timeoutId);
+      controller.abort();
+    };
+  }, [selectedCity, setAirDataLoading, setHourlySeries]);
+}
+
+/** Ambient air quality dashboard panel supporting live city telemetry and sample presets. */
 export function AirNowPanel(): JSX.Element {
   const {
     selectedCity,
@@ -116,31 +103,20 @@ export function AirNowPanel(): JSX.Element {
     setAirDataLoading,
     profile,
     language,
-  } = useAppStore();
+  } = useAppStore(
+    useShallow((s) => ({
+      selectedCity: s.selectedCity,
+      setSelectedCity: s.setSelectedCity,
+      hourlySeries: s.hourlySeries,
+      setHourlySeries: s.setHourlySeries,
+      setAirDataLoading: s.setAirDataLoading,
+      profile: s.profile,
+      language: s.language,
+    }))
+  );
   const t = getTranslations(language);
 
-  useEffect(() => {
-    let cancelled = false;
-    async function loadData() {
-      setAirDataLoading(true);
-      const live = new OpenMeteoProvider(
-        new SystemFetchPort(),
-        new SystemClock()
-      );
-      const sample = new SampleProvider(
-        selectedCity === 'Delhi' ? 'delhiSevere' : 'puneModerate'
-      );
-      const res = await fetchAirDataWithFallback(live, sample, selectedCity);
-      if (!cancelled) {
-        setAirDataLoading(false);
-        if (res.ok) setHourlySeries(res.value.series);
-      }
-    }
-    void loadData();
-    return () => {
-      cancelled = true;
-    };
-  }, [selectedCity, setAirDataLoading, setHourlySeries]);
+  useAirNowLoader(selectedCity, setAirDataLoading, setHourlySeries);
 
   const currentReading = hourlySeries?.readings[12] ?? {
     hour: 12,

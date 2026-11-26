@@ -1,4 +1,5 @@
 import type { JSX } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '../../app/store';
 import { determineHouseholdSensitivity } from '../../domain/profile';
 import { Badge, SegmentedControl, type BadgeSeverity } from '../../shared/ui';
@@ -48,7 +49,15 @@ function HouseholdMembersList({
 /** Interactive household demographic and living envelope profile configuration panel. */
 export function HouseholdPanel(): JSX.Element {
   const { profile, setProfile, activePreset, loadPreset, language } =
-    useAppStore();
+    useAppStore(
+      useShallow((s) => ({
+        profile: s.profile,
+        setProfile: s.setProfile,
+        activePreset: s.activePreset,
+        loadPreset: s.loadPreset,
+        language: s.language,
+      }))
+    );
   const t = getTranslations(language);
   const sensitivity = determineHouseholdSensitivity(profile.members);
 

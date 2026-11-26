@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, type JSX } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useAppStore, type NavigationTab } from './store';
 import { APP_NAME } from '../config/constants';
 import { getTranslations } from '../shared/i18n';
@@ -28,7 +29,14 @@ const CommunityPanel = lazy(() =>
 
 /** Header component presenting application branding, bilingual controls, and theme toggle. */
 function AppHeader(): JSX.Element {
-  const { language, setLanguage, theme, toggleTheme } = useAppStore();
+  const { language, setLanguage, theme, toggleTheme } = useAppStore(
+    useShallow((s) => ({
+      language: s.language,
+      setLanguage: s.setLanguage,
+      theme: s.theme,
+      toggleTheme: s.toggleTheme,
+    }))
+  );
   const langOptions = [
     { value: 'en' as const, label: 'EN' },
     { value: 'hi' as const, label: 'हिन्दी' },
@@ -69,7 +77,13 @@ function AppHeader(): JSX.Element {
 
 /** Primary tab navigation bar for switching between vertical domain views. */
 function AppNav(): JSX.Element {
-  const { activeTab, setActiveTab, language } = useAppStore();
+  const { activeTab, setActiveTab, language } = useAppStore(
+    useShallow((s) => ({
+      activeTab: s.activeTab,
+      setActiveTab: s.setActiveTab,
+      language: s.language,
+    }))
+  );
   const t = getTranslations(language);
 
   const tabs: readonly { id: NavigationTab; label: string }[] = [
@@ -109,7 +123,10 @@ function AppNav(): JSX.Element {
 
 /** Top-level application shell component routing vertical feature slices. */
 export function App(): JSX.Element {
-  const { activeTab, toastMessage, hideToast, theme } = useAppStore();
+  const activeTab = useAppStore((s) => s.activeTab);
+  const toastMessage = useAppStore((s) => s.toastMessage);
+  const hideToast = useAppStore((s) => s.hideToast);
+  const theme = useAppStore((s) => s.theme);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');

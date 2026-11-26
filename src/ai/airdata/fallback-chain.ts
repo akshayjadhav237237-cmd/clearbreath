@@ -16,11 +16,10 @@ export async function fetchAirDataWithFallback(
   signal?: AbortSignal
 ): Promise<Result<AirDataFetchResult, AirDataError>> {
   const liveResult = await liveProvider.fetchHourly(city, signal);
-  if (liveResult.ok) {
-    return ok({
-      series: liveResult.value,
-      source: 'live',
-    });
+  if (liveResult.ok || liveResult.error.code === 'aborted') {
+    return liveResult.ok
+      ? ok({ series: liveResult.value, source: 'live' })
+      : liveResult;
   }
 
   const sampleResult = await sampleProvider.fetchHourly(city, signal);

@@ -1,4 +1,5 @@
-import { useState, type JSX } from 'react';
+import { useMemo, useState, type JSX } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '../../app/store';
 import { generateRecommendations } from '../../domain/recommend';
 import { getActionCatalog } from '../../domain/actions';
@@ -80,48 +81,71 @@ function RecommendationsHeader({
   );
 }
 
+const REC_MOCK_AQI: AqiResult = {
+  value: 240,
+  category: 'veryPoor',
+  dominant: 'pm25',
+};
+
+const REC_MOCK_PLAN: DailyPlan = {
+  outdoorWindows: [],
+  bestVentilationWindow: null,
+  purifierSchedule: [],
+  hourlyAqi: [],
+  advisorySummary: '',
+};
+
 /** Particulate mitigation action catalog, cost-effectiveness ranking, and implementation tracker. */
 export function RecommendationsPanel(): JSX.Element {
   const { profile, completedActionIds, toggleActionCompleted, language } =
-    useAppStore();
+    useAppStore(
+      useShallow((s) => ({
+        profile: s.profile,
+        completedActionIds: s.completedActionIds,
+        toggleActionCompleted: s.toggleActionCompleted,
+        language: s.language,
+      }))
+    );
   const t = getTranslations(language);
   const [selectedCategory, setSelectedCategory] = useState<
     ActionCategory | 'all'
   >('all');
 
-  const aqi: AqiResult = {
-    value: 240,
-    category: 'veryPoor',
-    dominant: 'pm25',
-  };
-  const mockPlan: DailyPlan = {
-    outdoorWindows: [],
-    bestVentilationWindow: null,
-    purifierSchedule: [],
-    hourlyAqi: [],
-    advisorySummary: '',
-  };
-  const catalog = getActionCatalog();
+  const items = useMemo((): readonly RecItem[] => {
+    const res = generateRecommendations(
+      profile,
+      REC_MOCK_AQI,
+      REC_MOCK_PLAN,
+      getActionCatalog()
+    );
+    return res.ok ? res.value.items : [];
+  }, [profile]);
 
-  const recResult = generateRecommendations(profile, aqi, mockPlan, catalog);
-  const items: readonly RecItem[] = recResult.ok ? recResult.value.items : [];
+  const filtered = useMemo(
+    () =>
+      selectedCategory === 'all'
+        ? items
+        : items.filter((item) => item.action.category === selectedCategory),
+    [items, selectedCategory]
+  );
 
-  const filtered =
-    selectedCategory === 'all'
-      ? items
-      : items.filter((item) => item.action.category === selectedCategory);
-
-  const completedActions = items.filter((item) =>
-    completedActionIds.includes(item.action.id)
-  );
-  const totalAvoidedDoseUg = completedActions.reduce(
-    (acc, cur) => acc + cur.dailyDoseReductionUg,
-    0
-  );
-  const totalEmissionsSavedG = completedActions.reduce(
-    (acc, cur) => acc + cur.co2eSavedGramsPerDay,
-    0
-  );
+  const { completedActions, totalAvoidedDoseUg, totalEmissionsSavedG } =
+    useMemo(() => {
+      const done = items.filter((item) =>
+        completedActionIds.includes(item.action.id)
+      );
+      return {
+        completedActions: done,
+        totalAvoidedDoseUg: done.reduce(
+          (acc, cur) => acc + cur.dailyDoseReductionUg,
+          0
+        ),
+        totalEmissionsSavedG: done.reduce(
+          (acc, cur) => acc + cur.co2eSavedGramsPerDay,
+          0
+        ),
+      };
+    }, [items, completedActionIds]);
 
   const categories: readonly { id: ActionCategory | 'all'; label: string }[] = [
     { id: 'all', label: t.actions.filterAll },

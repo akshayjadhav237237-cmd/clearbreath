@@ -1,4 +1,6 @@
 import { useState, type JSX } from 'react';
+import { useShallow } from 'zustand/react/shallow';
+import { getCityById } from '../../config/cities';
 import { useAppStore } from '../../app/store';
 import { calculateAqi } from '../../domain/aqi';
 import { getTranslations } from '../../shared/i18n';
@@ -17,7 +19,16 @@ export function AssistantPanel(): JSX.Element {
     aiConsent,
     setAiConsent,
     language,
-  } = useAppStore();
+  } = useAppStore(
+    useShallow((s) => ({
+      profile: s.profile,
+      hourlySeries: s.hourlySeries,
+      selectedCity: s.selectedCity,
+      aiConsent: s.aiConsent,
+      setAiConsent: s.setAiConsent,
+      language: s.language,
+    }))
+  );
   const t = getTranslations(language);
   const [showFacts, setShowFacts] = useState(false);
   const [apiKey, setApiKey] = useState('');
@@ -28,11 +39,13 @@ export function AssistantPanel(): JSX.Element {
   const aqi: AqiResult = aqiRes.ok
     ? aqiRes.value
     : { value: 180, category: 'moderate', dominant: 'pm25' };
+  const safeCityName = getCityById(selectedCity)?.name ?? 'Selected City';
+
   const facts: readonly GroundingFact[] = [
     {
       id: 'aqi-current',
       kind: 'aqi',
-      text: `Current AQI in ${selectedCity} is ${aqi.value} (${aqi.category})`,
+      text: `Current AQI in ${safeCityName} is ${aqi.value} (${aqi.category})`,
       value: aqi.value,
     },
     {

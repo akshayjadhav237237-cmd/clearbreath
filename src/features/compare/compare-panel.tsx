@@ -1,4 +1,5 @@
-import type { JSX } from 'react';
+import { useMemo, type JSX } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '../../app/store';
 import { getActionCatalog } from '../../domain/actions';
 import { generateRecommendations } from '../../domain/recommend';
@@ -7,7 +8,7 @@ import { getTranslations } from '../../shared/i18n';
 import type {
   AqiResult,
   DailyPlan,
-  HouseholdProfile,
+  RecommendationResult,
 } from '../../domain/contracts';
 import { BaselineScenarioCard, MitigatedScenarioCard } from './scenario-cards';
 
@@ -26,13 +27,10 @@ const MOCK_PLAN: DailyPlan = {
 };
 
 function calculateTotals(
-  profile: HouseholdProfile,
+  allItems: RecommendationResult['items'],
   completedActionIds: readonly string[],
   baselineDoseUg: number
 ) {
-  const catalog = getActionCatalog();
-  const recRes = generateRecommendations(profile, MOCK_AQI, MOCK_PLAN, catalog);
-  const allItems = recRes.ok ? recRes.value.items : [];
   const activeItems = allItems.filter((i) =>
     completedActionIds.includes(i.action.id)
   );
@@ -68,7 +66,14 @@ function calculateTotals(
 
 /** Side-by-side comparative impact modeling evaluating baseline vs mitigated scenario outcomes. */
 export function ComparePanel(): JSX.Element {
-  const { profile, hourlySeries, completedActionIds, language } = useAppStore();
+  const { profile, hourlySeries, completedActionIds, language } = useAppStore(
+    useShallow((s) => ({
+      profile: s.profile,
+      hourlySeries: s.hourlySeries,
+      completedActionIds: s.completedActionIds,
+      language: s.language,
+    }))
+  );
   const t = getTranslations(language);
 
   const outdoorPm25 = hourlySeries?.readings[12]?.pm25 ?? 180;
@@ -78,6 +83,16 @@ export function ComparePanel(): JSX.Element {
       profile.lifestyle.outdoorMinutesPerDay * outdoorPm25 * 0.02
   );
 
+  const allItems = useMemo(() => {
+    const recRes = generateRecommendations(
+      profile,
+      MOCK_AQI,
+      MOCK_PLAN,
+      getActionCatalog()
+    );
+    return recRes.ok ? recRes.value.items : [];
+  }, [profile]);
+
   const {
     activeCount,
     totalDoseReductionUg,
@@ -85,7 +100,10 @@ export function ComparePanel(): JSX.Element {
     totalEmissionsSavedG,
     mitigatedDoseUg,
     doseSavedPct,
-  } = calculateTotals(profile, completedActionIds, baselineDoseUg);
+  } = useMemo(
+    () => calculateTotals(allItems, completedActionIds, baselineDoseUg),
+    [allItems, completedActionIds, baselineDoseUg]
+  );
 
   const mitigatedIndoorPm25 = Math.max(
     25,

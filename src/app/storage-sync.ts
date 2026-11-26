@@ -6,11 +6,7 @@ import {
   type PersistedStateV1,
 } from '../persistence';
 
-/** Connects the centralized application store to versioned storage persistence. */
-export function initStorageSync(storage: StoragePort): () => void {
-  const store = useAppStore.getState();
-
-  // Initial load and hydration
+function hydrateInitialState(storage: StoragePort): void {
   const loadResult = loadPersistedState(storage);
   if (loadResult.ok) {
     const s = loadResult.value;
@@ -21,17 +17,36 @@ export function initStorageSync(storage: StoragePort): () => void {
       aiConsent: s.aiConsent,
       selectedCity: s.selectedCity,
     });
-  } else if (
-    loadResult.error.code === 'INVALID_SCHEMA' ||
-    loadResult.error.code === 'MIGRATION_FAILED'
-  ) {
-    store.showToast(
-      'Corrupted or incompatible stored data reset to default family profile.'
-    );
+    return;
   }
+  const code = loadResult.error.code;
+  if (
+    code === 'INVALID_SCHEMA' ||
+    code === 'MIGRATION_FAILED' ||
+    code === 'PAYLOAD_TOO_LARGE'
+  ) {
+    useAppStore
+      .getState()
+      .showToast(
+        'Corrupted or incompatible stored data reset to default family profile.'
+      );
+  }
+}
 
-  // Subscribe to changes and write forward
-  const unsubscribe = useAppStore.subscribe((state) => {
+/** Connects the centralized application store to versioned storage persistence. */
+export function initStorageSync(storage: StoragePort): () => void {
+  hydrateInitialState(storage);
+  let prev = useAppStore.getState();
+
+  return useAppStore.subscribe((state) => {
+    const unchanged =
+      state.profile === prev.profile &&
+      state.language === prev.language &&
+      state.completedActionIds === prev.completedActionIds &&
+      state.aiConsent === prev.aiConsent &&
+      state.selectedCity === prev.selectedCity;
+    if (unchanged) return;
+    prev = state;
     const payload: PersistedStateV1 = {
       version: 1,
       profile: state.profile,
@@ -43,6 +58,4 @@ export function initStorageSync(storage: StoragePort): () => void {
     };
     savePersistedState(storage, payload);
   });
-
-  return unsubscribe;
 }
