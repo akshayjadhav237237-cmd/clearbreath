@@ -1,5 +1,6 @@
 import { useState, useRef, type ChangeEvent } from 'react';
 import { useAppStore } from '../../app/store';
+import { MAX_IMPORT_SIZE_BYTES } from '../../exports';
 import {
   exportPlanCsv,
   exportDailyPlanIcs,
@@ -21,10 +22,20 @@ function parseAndLoadFile(
   onSuccess: (p: HouseholdProfile) => void,
   onError: (msg: string) => void
 ): void {
+  if (file.size > MAX_IMPORT_SIZE_BYTES) {
+    onError('Import file exceeds maximum allowed size (50 KiB)');
+    return;
+  }
   const reader = new FileReader();
+  reader.onerror = (): void => {
+    onError('Failed to read import file.');
+  };
   reader.onload = (ev): void => {
     const text = ev.target?.result;
-    if (typeof text !== 'string') return;
+    if (typeof text !== 'string') {
+      onError('Invalid file content.');
+      return;
+    }
     const res = importProfileJson(text);
     if (res.ok) {
       onSuccess(res.value);
@@ -59,7 +70,9 @@ export function usePlanExports(
   plan: DailyPlan,
   recommendations?: RecommendationResult
 ) {
-  const { profile, setProfile, showToast } = useAppStore();
+  const profile = useAppStore((s) => s.profile);
+  const setProfile = useAppStore((s) => s.setProfile);
+  const showToast = useAppStore((s) => s.showToast);
   const [statusMessage, setStatusMessage] = useState<string>('');
   const fileInputRef = useRef<HTMLInputElement>(null);
 

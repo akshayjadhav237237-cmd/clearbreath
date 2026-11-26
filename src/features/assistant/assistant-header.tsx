@@ -75,6 +75,7 @@ export function AssistantHeader({
           <input
             id="gemini-key-input"
             type="password"
+            autoComplete="off"
             aria-label="Gemini API Key"
             placeholder="Enter API key (in-memory only; not persisted)"
             value={apiKey}

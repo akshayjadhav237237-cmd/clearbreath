@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 /** Zod schema validating individual household member demographics. */
 export const memberSchema = z.object({
-  id: z.string().min(1),
+  id: z.string().min(1).max(64),
   ageGroup: z.enum(['infant', 'child', 'adult', 'older']),
   respiratoryCondition: z.boolean(),
 });
@@ -42,7 +42,7 @@ export const lifestyleSchema = z.object({
 
 /** Zod schema validating complete composite household profile. */
 export const householdProfileSchema = z.object({
-  members: z.array(memberSchema).min(1),
+  members: z.array(memberSchema).min(1).max(20),
   home: homeProfileSchema,
   lifestyle: lifestyleSchema,
 });

@@ -3,6 +3,7 @@ import type { DailyPlan } from '../domain/contracts';
 
 const CRLF = '\r\n';
 const MAX_OCTETS = 75;
+const UTF8_ENCODER = new TextEncoder();
 
 /** Escapes text content according to RFC 5545 section 3.3.11. */
 export function escapeIcsText(text: string): string {
@@ -10,23 +11,38 @@ export function escapeIcsText(text: string): string {
     .replace(/\\/g, '\\\\')
     .replace(/;/g, '\\;')
     .replace(/,/g, '\\,')
-    .replace(/\r?\n/g, '\\n');
+    .replace(/\r\n|\r|\n/g, '\\n');
 }
 
-/** Folds an ICS content line at 75 octets inserting CRLF and a space. */
+function appendFoldedChunk(chunks: string[], text: string): void {
+  if (text.length > 0) {
+    chunks.push(chunks.length === 0 ? text : ` ${text}`);
+  }
+}
+
+/** Folds an ICS content line at 75 UTF-8 octets inserting CRLF and a space. */
 export function foldIcsLine(line: string): string {
-  if (line.length <= MAX_OCTETS) {
+  if (UTF8_ENCODER.encode(line).length <= MAX_OCTETS) {
     return line;
   }
   const chunks: string[] = [];
-  let remaining = line;
-  chunks.push(remaining.slice(0, MAX_OCTETS));
-  remaining = remaining.slice(MAX_OCTETS);
+  let current = '';
+  let octets = 0;
+  let limit = MAX_OCTETS;
 
-  while (remaining.length > 0) {
-    chunks.push(` ${remaining.slice(0, MAX_OCTETS - 1)}`);
-    remaining = remaining.slice(MAX_OCTETS - 1);
+  for (const ch of line) {
+    const chBytes = UTF8_ENCODER.encode(ch).length;
+    if (octets + chBytes > limit && current.length > 0) {
+      appendFoldedChunk(chunks, current);
+      current = ch;
+      octets = chBytes;
+      limit = MAX_OCTETS - 1;
+    } else {
+      current += ch;
+      octets += chBytes;
+    }
   }
+  appendFoldedChunk(chunks, current);
   return chunks.join(CRLF);
 }
 
@@ -67,7 +83,7 @@ interface VEventParams {
 function buildVEvent(p: VEventParams): string[] {
   return [
     'BEGIN:VEVENT',
-    `UID:${p.uid}@clearbreath.local`,
+    `UID:${escapeIcsText(p.uid)}@clearbreath.local`,
     `DTSTAMP:${p.stamp}`,
     `SUMMARY:${escapeIcsText(p.summary)}`,
     `DESCRIPTION:${escapeIcsText(p.desc)}`,
