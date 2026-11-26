@@ -68,7 +68,7 @@ export const EN_TRANSLATIONS: AppTranslations = {
   },
   actions: {
     title: 'Mitigation Actions',
-    filterAll: 'All Categories',
+    filterAll: 'Every Category',
     doneToday: 'Completed Today',
     avoidedDose: 'Daily Avoided Inhaled Dose',
     avoidedCo2: 'Carbon Emissions Prevented',
@@ -88,11 +88,11 @@ export const EN_TRANSLATIONS: AppTranslations = {
       'Advisories are grounded strictly in CPCB and EPA models. For medical symptoms, consult a doctor.',
     placeholder: 'Ask about air quality, filters, or commute safety...',
     send: 'Ask',
-    consentToggle: 'Enable Cloud Gemini 3.5 Flash (Allowlist Egress)',
+    consentToggle: 'Enable Cloud Gemini 3.8 Flash (Allowlist Egress)',
     consentNote:
-      'When disabled, AI is optional; domain engines run in the browser without network calls after the page has loaded.',
+      'Optional. Domain engines run in the browser; Open-Meteo receives the selected city coordinates on load, and Gemini receives allowlisted fields only with consent and an API key.',
     modeLocal: 'Local Template Engine',
-    modeGemini: 'Gemini 3.5 Flash (Grounded)',
+    modeGemini: 'Gemini 3.8 Flash (Grounded)',
     showFacts: 'Inspect Grounding Facts Passed to AI',
   },
   community: {

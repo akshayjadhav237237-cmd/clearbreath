@@ -1,131 +1,78 @@
-import type { JSX } from 'react';
+import { useMemo, type JSX } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '../../app/store';
 import { generateDailyPlan } from '../../domain/planner';
 import { determineHouseholdSensitivity } from '../../domain/profile';
-import { Badge } from '../../shared/ui';
 import { getTranslations } from '../../shared/i18n';
+import { SystemClock } from '../../shared/system-ports';
 import type { DailyPlan, HourlyReading } from '../../domain/contracts';
 import { DiurnalChart } from './diurnal-chart';
 import { PlanExportBar } from './plan-export-bar';
+import { PlanMetrics } from './plan-metrics';
 import { SmogDayPlanPrint } from '../print';
 
-type OutdoorWindow = DailyPlan['outdoorWindows'][number];
-type PurifierSlot = DailyPlan['purifierSchedule'][number];
-type VentWindow = NonNullable<DailyPlan['bestVentilationWindow']>;
+const FALLBACK_READINGS: readonly HourlyReading[] = Array.from(
+  { length: 24 },
+  (_, i) => ({
+    hour: i,
+    pm25: i >= 11 && i <= 16 ? 95 : 240,
+    pm10: i >= 11 && i <= 16 ? 160 : 380,
+  })
+);
 
-interface PlanMetricsProps {
-  readonly bestWindow: OutdoorWindow;
-  readonly ventWindow: VentWindow | null;
-  readonly purifierSchedule: readonly PurifierSlot[];
-  readonly t: ReturnType<typeof getTranslations>;
-}
+const FALLBACK_PLAN: DailyPlan = {
+  outdoorWindows: [{ startHour: 12, endHour: 15, averageAqi: 120 }],
+  bestVentilationWindow: { startHour: 13, endHour: 14 },
+  purifierSchedule: Array.from({ length: 24 }, (_, h) => ({
+    hour: h,
+    operationalState: h >= 20 || h <= 8 ? 'high' : 'low',
+  })),
+  hourlyAqi: [],
+  advisorySummary: 'Exercise caution during peak evening hours.',
+};
 
-function PlanMetrics({
-  bestWindow,
-  ventWindow,
-  purifierSchedule,
-  t,
-}: PlanMetricsProps): JSX.Element {
-  const highHoursCount = purifierSchedule.filter(
-    (p) => p.operationalState === 'high'
-  ).length;
-
-  return (
-    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 print:hidden">
-      <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            {t.plan.outdoorWindow}
-          </h3>
-          <Badge severity="good">SAFEST WINDOW</Badge>
-        </div>
-        <p className="mt-3 font-mono text-2xl font-extrabold text-emerald-800 dark:text-emerald-300">
-          {String(bestWindow.startHour).padStart(2, '0')}:00 –{' '}
-          {String(bestWindow.endHour).padStart(2, '0')}:00
-        </p>
-        <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
-          Average AQI:{' '}
-          <span className="font-semibold text-slate-900 dark:text-slate-100">
-            {bestWindow.averageAqi}
-          </span>
-        </p>
-      </article>
-
-      <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            {t.plan.ventilation}
-          </h3>
-          <Badge severity="info">CROSS VENTILATION</Badge>
-        </div>
-        <p className="mt-3 font-mono text-2xl font-extrabold text-sky-800 dark:text-sky-300">
-          {ventWindow ? '30 Minutes' : 'Sealed'}
-        </p>
-        <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
-          Window:{' '}
-          <span className="font-semibold text-slate-900 dark:text-slate-100">
-            {ventWindow
-              ? `${String(ventWindow.startHour).padStart(2, '0')}:00 – ${String(ventWindow.endHour).padStart(2, '0')}:00`
-              : 'Keep windows shut'}
-          </span>
-        </p>
-      </article>
-
-      <article className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex items-center justify-between">
-          <h3 className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-            {t.plan.purifierSchedule}
-          </h3>
-          <Badge severity="moderate">HEPA CADR</Badge>
-        </div>
-        <p className="mt-3 font-mono text-2xl font-extrabold text-amber-800 dark:text-amber-300">
-          {highHoursCount} Hours High
-        </p>
-        <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
-          Night Inversion:{' '}
-          <span className="font-semibold text-slate-900 dark:text-slate-100">
-            Full Power (20:00 - 08:00)
-          </span>
-        </p>
-      </article>
-    </div>
-  );
-}
+const FALLBACK_WINDOW = { startHour: 12, endHour: 15, averageAqi: 120 };
 
 /** Interactive 24-hour diurnal particulate curve and mitigation scheduling advisory panel. */
 export function PlanPanel(): JSX.Element {
-  const { hourlySeries, profile, language } = useAppStore();
+  const { hourlySeries, profile, language } = useAppStore(
+    useShallow((s) => ({
+      hourlySeries: s.hourlySeries,
+      profile: s.profile,
+      language: s.language,
+    }))
+  );
   const t = getTranslations(language);
 
   const readings: readonly HourlyReading[] =
-    hourlySeries?.readings ??
-    Array.from({ length: 24 }, (_, i) => ({
-      hour: i,
-      pm25: i >= 11 && i <= 16 ? 95 : 240,
-      pm10: i >= 11 && i <= 16 ? 160 : 380,
-    }));
+    hourlySeries?.readings ?? FALLBACK_READINGS;
 
-  const sensitivity = determineHouseholdSensitivity(profile.members);
-  const planRes = generateDailyPlan(readings, sensitivity, profile.lifestyle);
-  const plan: DailyPlan = planRes.ok
-    ? planRes.value
-    : {
-        outdoorWindows: [{ startHour: 12, endHour: 15, averageAqi: 120 }],
-        bestVentilationWindow: { startHour: 13, endHour: 14 },
-        purifierSchedule: Array.from({ length: 24 }, (_, h) => ({
-          hour: h,
-          operationalState: h >= 20 || h <= 8 ? 'high' : 'low',
-        })),
-        hourlyAqi: [],
-        advisorySummary: 'Exercise caution during peak evening hours.',
-      };
+  const plan = useMemo((): DailyPlan => {
+    const sensitivity = determineHouseholdSensitivity(profile.members);
+    const planRes = generateDailyPlan(readings, sensitivity, profile.lifestyle);
+    return planRes.ok ? planRes.value : FALLBACK_PLAN;
+  }, [readings, profile.members, profile.lifestyle]);
 
-  const bestWindow = plan.outdoorWindows[0] ?? {
-    startHour: 12,
-    endHour: 15,
-    averageAqi: 120,
-  };
-  const maxPm25 = Math.max(...readings.map((r) => r.pm25));
+  const bestWindow = plan.outdoorWindows[0] ?? FALLBACK_WINDOW;
+  const maxPm25 = useMemo(
+    () => readings.reduce((mx, r) => (r.pm25 > mx ? r.pm25 : mx), 0),
+    [readings]
+  );
+  const peakAqi = useMemo(
+    () =>
+      plan.hourlyAqi.reduce(
+        (best, cur) => (cur.value > best.value ? cur : best),
+        plan.hourlyAqi[0] ?? {
+          value: bestWindow.averageAqi,
+          category: 'severe' as const,
+        }
+      ),
+    [plan.hourlyAqi, bestWindow.averageAqi]
+  );
+  const todayIsoDate = useMemo(
+    () => new Date(new SystemClock().now()).toISOString().slice(0, 10),
+    []
+  );
   const handlePrint = (): void => {
     if (typeof window !== 'undefined') window.print();
   };
@@ -140,8 +87,8 @@ export function PlanPanel(): JSX.Element {
           {t.plan.title}
         </h2>
         <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
-          Optimal outdoor windows and room-by-room ventilation schedules
-          calculated from mass-balance air exchange models.
+          Lower-pollution outdoor windows, ventilation slots, and purifier
+          schedules derived from diurnal AQI trends and household sensitivity.
         </p>
         <DiurnalChart
           readings={readings}
@@ -159,9 +106,9 @@ export function PlanPanel(): JSX.Element {
       <SmogDayPlanPrint
         profile={profile}
         plan={plan}
-        currentAqi={bestWindow.averageAqi}
-        aqiCategory="severe"
-        dateFormatted="2026-11-19"
+        currentAqi={peakAqi.value}
+        aqiCategory={peakAqi.category}
+        dateFormatted={todayIsoDate}
         onPrint={handlePrint}
       />
     </section>

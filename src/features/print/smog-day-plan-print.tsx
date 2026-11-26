@@ -104,7 +104,7 @@ export function SmogDayPlanPrint({
           <p>
             {plan.bestVentilationWindow
               ? `${plan.bestVentilationWindow.startHour}:00 - ${plan.bestVentilationWindow.endHour}:00`
-              : 'Keep windows sealed all day'}
+              : 'Keep windows closed during smog hours'}
           </p>
         </div>
         <div className="rounded border border-slate-200 p-2.5 print:border-black">

@@ -1,4 +1,5 @@
 import type { JSX } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '../../app/store';
 import { calculateAqi } from '../../domain/aqi';
 import { Badge } from '../../shared/ui';
@@ -7,7 +8,14 @@ import type { AqiResult } from '../../domain/contracts';
 
 /** Generates shareable air quality advisories for residential welfare associations and community groups. */
 export function CommunityPanel(): JSX.Element {
-  const { selectedCity, hourlySeries, showToast, language } = useAppStore();
+  const { selectedCity, hourlySeries, showToast, language } = useAppStore(
+    useShallow((s) => ({
+      selectedCity: s.selectedCity,
+      hourlySeries: s.hourlySeries,
+      showToast: s.showToast,
+      language: s.language,
+    }))
+  );
   const t = getTranslations(language);
 
   const sampleReading = hourlySeries?.readings[12];
@@ -21,7 +29,7 @@ export function CommunityPanel(): JSX.Element {
   const broadcastText =
     `📢 *Clearbreath Neighborhood Air Advisory — ${selectedCity}*\n\n` +
     `⚠️ Current AQI: *${aqi.value} (${aqi.category.toUpperCase()})*\n` +
-    `☀️ Safest Outdoor Hours: *12:00 PM – 3:00 PM*\n\n` +
+    `☀️ Optimal Outdoor Hours: *12:00 PM – 3:00 PM*\n\n` +
     `*Top Community Actions Today:*\n` +
     `1. 🚫 Prohibit open biomass or dry leaf burning in society grounds.\n` +
     `2. 🚗 Opt for carpooling or Metro to eliminate 2.4 kg CO2e per trip.\n` +

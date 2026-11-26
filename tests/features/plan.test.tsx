@@ -12,7 +12,7 @@ describe('PlanPanel', () => {
     expect(
       screen.getByRole('heading', { name: /24-hour diurnal advisory/i })
     ).toBeDefined();
-    expect(screen.getByText(/safest window/i)).toBeDefined();
+    expect(screen.getByText(/lowest aqi window/i)).toBeDefined();
     expect(screen.getByText(/cross ventilation/i)).toBeDefined();
     expect(screen.getByText(/hepa cadr/i)).toBeDefined();
   });

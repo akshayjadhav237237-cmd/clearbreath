@@ -34,7 +34,7 @@ export function BaselineScenarioCard({
           label="Total Daily Inhaled Dose"
           value={baselineDoseUg.toLocaleString('en-IN')}
           unit="µg/day"
-          tooltip="Aggregated across all household members"
+          tooltip="Estimated across living household members"
         />
         <MetricCard
           label="Implementation Cost"
