@@ -1,6 +1,6 @@
-# Verified Evidence Sources
+# Evidence Sources
 
-This document records the verified scientific literature, regulatory standards, and empirical data sources utilized across Clearbreath domain engines.
+This document lists the scientific literature, regulatory standards, and external API references cited across Clearbreath domain and AI modules.
 
 | Source ID                            | Title / Citation                                                                                         | Organization                                                                       | URL                                                                          | Date Accessed |
 | ------------------------------------ | -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- | ------------- |
@@ -23,5 +23,11 @@ This document records the verified scientific literature, regulatory standards, 
 | `dmrc-sustainability-2022`           | Modal Shift & GHG Emissions Reduction Accounting Report                                                  | Delhi Metro Rail Corporation (DMRC)                                                | https://www.delhimetrorail.com/corporate-sustainability                      | 2026-11-18    |
 | `iitk-delhi-air-study`               | Comprehensive Study on Air Pollution and Green House Gases in Delhi                                      | Indian Institute of Technology Kanpur (IITK)                                       | https://cpcb.nic.in/delhi-air-pollution-study-iitk/                          | 2026-11-18    |
 | `lancet-planetary-health-india`      | Health and Economic Impact of Air Pollution in the States of India (Lancet Planet Health 5:e25-38)       | Pandey A. et al. / GBD India Air Pollution Collaborators                           | https://www.thelancet.com/journals/lanplh                                    | 2026-11-18    |
-| `google-gemini-api`                  | Google Gemini REST API Documentation and Model Reference (gemini-3.8-flash)                              | Google DeepMind / Google AI for Developers                                         | https://ai.google.dev/gemini-api/docs/models                                 | 2026-11-19    |
+| `google-gemini-api`                  | Google Gemini REST API Documentation and Model Reference (gemini-3.8-flash)                              | Google DeepMind / Google AI for Developers                                         | https://ai.google.dev/gemini-api/docs/models                                 | 2026-11-26    |
 | `open-meteo-air-quality`             | Open-Meteo Air Quality API Documentation and CC BY 4.0 Attribution                                       | Open-Meteo & ECMWF Copernicus Atmosphere Monitoring Service                        | https://open-meteo.com/en/docs/air-quality-api                               | 2026-11-18    |
+
+## Notes on Reference Scope
+
+- External citation URLs were recorded on the access dates shown above and are not fetched automatically during build or verification runs.
+- `google-gemini-api` aligns with `GEMINI_MODEL_ID = 'gemini-3.8-flash'` (`src/config/constants.ts`); live API execution against Google's Gemini endpoint remains unverified without a live API key.
+- Synthetic diurnal scaling arrays in `src/ai/airdata/manual-provider.ts` (`DIURNAL_COEFFICIENTS`) and `src/ai/airdata/sample-provider.ts` (`WINTER_DIURNAL_FACTORS`) are internal deterministic fixtures used for scenario demos and tests rather than external published curves.
