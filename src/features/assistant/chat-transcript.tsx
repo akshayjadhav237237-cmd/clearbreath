@@ -1,13 +1,12 @@
 import type { JSX } from 'react';
 import { Modal } from '../../shared/ui';
-import type { GroundingFact } from '../../ai/contracts';
-
-/** Pre-canned suggested prompts for user exploration. */
-const PRE_CANNED_PROMPTS = [
-  'Can my child play outdoors at 4pm?',
-  'How much will a DIY air cleaner reduce indoor PM2.5?',
-  'What is the cleanest commute option during severe smog?',
-] as const;
+import type { GroundingFact, Language } from '../../ai/contracts';
+import { getTranslations } from '../../shared/i18n';
+import {
+  formatAssistantSource,
+  formatFallbackNotice,
+  getShellDict,
+} from '../../shared/i18n/shell-dict';
 
 /** Single message entry rendered within the conversational transcript. */
 export interface ChatMessage {
@@ -32,36 +31,46 @@ function getBubbleStyle(
   return 'border border-slate-200 bg-slate-50 text-slate-900 dark:border-slate-800 dark:bg-slate-800 dark:text-slate-100';
 }
 
-/** Sub-component rendering the scrollable chat message transcript. */
 function ChatTranscript({
   messages,
+  language,
 }: {
   readonly messages: readonly ChatMessage[];
+  readonly language: Language;
 }): JSX.Element {
+  const { refusalText } = getShellDict(language);
+
   return (
     <div className="my-4 max-h-80 space-y-3 overflow-y-auto pr-1">
-      {messages.map((m) => (
-        <div
-          key={m.id}
-          className={`flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'}`}
-        >
+      {messages.map((m) => {
+        const notice = formatFallbackNotice(
+          language,
+          m.fallbackReason,
+          m.refusal
+        );
+        return (
           <div
-            className={`max-w-[85%] rounded-2xl px-4 py-2 text-xs sm:text-sm ${getBubbleStyle(m.sender, m.refusal)}`}
+            key={m.id}
+            className={`flex flex-col ${m.sender === 'user' ? 'items-end' : 'items-start'}`}
           >
-            <p>{m.text}</p>
-            {m.fallbackReason === 'modelUnavailable' ? (
-              <span className="mt-1 block text-[11px] font-medium text-amber-800 dark:text-amber-200">
-                AI model unavailable, local guidance shown.
-              </span>
-            ) : null}
-            {m.source ? (
-              <span className="mt-1 block text-[10px] text-slate-700 dark:text-slate-300">
-                Source: {m.source} engine
-              </span>
-            ) : null}
+            <div
+              className={`max-w-[85%] rounded-2xl px-4 py-2 text-xs sm:text-sm ${getBubbleStyle(m.sender, m.refusal)}`}
+            >
+              <p>{m.refusal ? refusalText : m.text}</p>
+              {notice ? (
+                <span className="mt-1 block text-[11px] font-medium text-amber-800 dark:text-amber-200">
+                  {notice}
+                </span>
+              ) : null}
+              {m.source ? (
+                <span className="mt-1 block text-[10px] text-slate-700 dark:text-slate-300">
+                  {formatAssistantSource(language, m.source)}
+                </span>
+              ) : null}
+            </div>
           </div>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -74,6 +83,7 @@ interface ChatBoxProps {
   readonly onSend: (text: string) => void;
   readonly placeholder: string;
   readonly sendLabel: string;
+  readonly language?: Language;
 }
 
 /** Chat box rendering suggested prompts, transcript list, and input form. */
@@ -85,11 +95,14 @@ export function AssistantChatBox({
   onSend,
   placeholder,
   sendLabel,
+  language = 'en',
 }: ChatBoxProps): JSX.Element {
+  const { prompts } = getShellDict(language);
+
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <div className="flex flex-wrap gap-2 pb-3 border-b border-slate-100 dark:border-slate-800">
-        {PRE_CANNED_PROMPTS.map((p) => (
+      <div className="flex flex-wrap gap-2 border-b border-slate-100 pb-3 dark:border-slate-800">
+        {prompts.map((p) => (
           <button
             key={p}
             type="button"
@@ -100,7 +113,7 @@ export function AssistantChatBox({
           </button>
         ))}
       </div>
-      <ChatTranscript messages={messages} />
+      <ChatTranscript messages={messages} language={language} />
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -129,30 +142,48 @@ export function AssistantChatBox({
   );
 }
 
+function formatFactKindLabel(kind: string, language: Language): string {
+  if (language !== 'hi') return kind;
+  return kind === 'aqi' ? 'एक्यूआई' : 'उपाय';
+}
+
 /** Modal dialog presenting empirical grounding facts supplied to the assistant. */
 export function FactsModal({
   isOpen,
   onClose,
   facts,
+  language = 'en',
 }: {
   readonly isOpen: boolean;
   readonly onClose: () => void;
   readonly facts: readonly GroundingFact[];
+  readonly language?: Language;
 }): JSX.Element {
+  const { factsTitle } = getShellDict(language);
+  const { common } = getTranslations(language);
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Grounding Facts Sent to AI">
+    <Modal
+      isOpen={isOpen}
+      onClose={onClose}
+      title={factsTitle}
+      closeLabel={common.closeDialog}
+    >
       <ul className="space-y-2">
-        {facts.map((f) => (
-          <li
-            key={f.id}
-            className="rounded-lg border border-slate-200 p-2 text-xs dark:border-slate-800"
-          >
-            <span className="font-mono text-[10px] text-sky-700 dark:text-sky-300">
-              [{f.kind}]
-            </span>
-            <p className="mt-0.5">{f.text}</p>
-          </li>
-        ))}
+        {facts.map((f) => {
+          const kindLabel = formatFactKindLabel(f.kind, language);
+          return (
+            <li
+              key={f.id}
+              className="rounded-lg border border-slate-200 p-2 text-xs dark:border-slate-800"
+            >
+              <span className="font-mono text-[10px] text-sky-700 dark:text-sky-300">
+                [{kindLabel}]
+              </span>
+              <p className="mt-0.5">{f.text}</p>
+            </li>
+          );
+        })}
       </ul>
     </Modal>
   );

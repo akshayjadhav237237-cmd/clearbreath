@@ -3,7 +3,11 @@ import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '../../app/store';
 import { determineHouseholdSensitivity } from '../../domain/profile';
 import { Badge, SegmentedControl, type BadgeSeverity } from '../../shared/ui';
-import { getTranslations } from '../../shared/i18n';
+import { getTranslations, type Language } from '../../shared/i18n';
+import {
+  getHouseholdSpecDict,
+  type HouseholdSpecDict,
+} from '../../shared/i18n/household-dict';
 import type { Member, SensitivityLevel } from '../../domain/contracts';
 import { HouseholdHomeSpecs } from './household-specs';
 
@@ -16,9 +20,11 @@ function getSensitivitySeverity(level: SensitivityLevel): BadgeSeverity {
 function HouseholdMembersList({
   members,
   title,
+  specDict,
 }: {
   readonly members: readonly Member[];
   readonly title: string;
+  readonly specDict: HouseholdSpecDict;
 }): JSX.Element {
   return (
     <article className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -32,12 +38,12 @@ function HouseholdMembersList({
             className="flex items-center justify-between py-2.5"
           >
             <span className="font-medium capitalize text-slate-900 dark:text-slate-100">
-              {index + 1}. {member.ageGroup}
+              {index + 1}. {specDict.ageGroups[member.ageGroup]}
             </span>
             <span className="text-slate-700 dark:text-slate-300">
               {member.respiratoryCondition
-                ? '⚠️ Respiratory Condition'
-                : 'Healthy'}
+                ? specDict.respiratoryCondition
+                : specDict.healthy}
             </span>
           </li>
         ))}
@@ -58,7 +64,8 @@ export function HouseholdPanel(): JSX.Element {
         language: s.language,
       }))
     );
-  const t = getTranslations(language);
+  const t = getTranslations(language as Language);
+  const specDict = getHouseholdSpecDict(language as Language);
   const sensitivity = determineHouseholdSensitivity(profile.members);
 
   const presetOptions = [
@@ -84,10 +91,10 @@ export function HouseholdPanel(): JSX.Element {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs font-medium text-slate-700 dark:text-slate-300">
-              Sensitivity:
+              {specDict.sensitivityLabel}
             </span>
             <Badge severity={getSensitivitySeverity(sensitivity)}>
-              {sensitivity.toUpperCase()} RISK
+              {specDict.sensitivityLevels[sensitivity]} {specDict.riskSuffix}
             </Badge>
           </div>
         </div>
@@ -115,11 +122,14 @@ export function HouseholdPanel(): JSX.Element {
         <HouseholdMembersList
           members={profile.members}
           title={t.household.membersTitle}
+          specDict={specDict}
         />
         <HouseholdHomeSpecs
           home={profile.home}
           budgetRupees={profile.lifestyle.budgetRupees}
           title={t.household.homeTitle}
+          budgetTitle={t.household.budgetTitle}
+          specDict={specDict}
           onBudgetChange={(newBudget) =>
             setProfile({
               ...profile,

@@ -3,6 +3,8 @@ import { Component, type ReactNode } from 'react';
 interface ErrorBoundaryProps {
   readonly children: ReactNode;
   readonly fallback?: ReactNode;
+  readonly fallbackTitle?: string;
+  readonly fallbackMessage?: string;
 }
 
 interface ErrorBoundaryState {
@@ -28,9 +30,12 @@ export class ErrorBoundary extends Component<
             role="alert"
             className="rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-950 dark:border-rose-900/60 dark:bg-rose-950/40 dark:text-rose-100"
           >
-            <h2 className="text-base font-bold">Something went wrong</h2>
+            <h2 className="text-base font-bold">
+              {this.props.fallbackTitle ?? 'Something went wrong'}
+            </h2>
             <p className="mt-2 text-xs">
-              Unable to display this view. Please try refreshing the page.
+              {this.props.fallbackMessage ??
+                'Unable to display this view. Please try refreshing the page.'}
             </p>
           </div>
         )

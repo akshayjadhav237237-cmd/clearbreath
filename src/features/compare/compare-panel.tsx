@@ -1,181 +1,165 @@
-import { useMemo, type JSX } from 'react';
+import { useMemo, useState, type JSX } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '../../app/store';
 import { getActionCatalog } from '../../domain/actions';
-import { generateRecommendations } from '../../domain/recommend';
-import { Badge } from '../../shared/ui';
+import type { Action } from '../../domain/contracts';
+import { aqiToPm25 } from '../../domain/recommend';
+import type { Language } from '../../shared/i18n';
 import { getTranslations } from '../../shared/i18n';
-import type {
-  AqiResult,
-  DailyPlan,
-  RecommendationResult,
-} from '../../domain/contracts';
-import { BaselineScenarioCard, MitigatedScenarioCard } from './scenario-cards';
+import {
+  getCompareTranslations,
+  type CompareTranslations,
+} from '../../shared/i18n/compare-dict';
+import { ActionComparisonPicker } from './action-comparison-picker';
+import { CompareHeader } from './compare-header';
+import {
+  AssumptionsDisclosureCard,
+  BaselineScenarioCard,
+  MitigatedScenarioCard,
+} from './scenario-cards';
+import {
+  buildCompareViewModel,
+  evaluateActionComparison,
+  type CompareViewModel,
+} from './scenario-model';
 
-const MOCK_AQI: AqiResult = {
-  value: 200,
-  category: 'moderate',
-  dominant: 'pm25',
-};
+const DEFAULT_CHOICE_A_ID = 'act-indoor-box-fan';
+const DEFAULT_CHOICE_B_ID = 'act-mobility-electric-or-bus';
 
-const MOCK_PLAN: DailyPlan = {
-  outdoorWindows: [],
-  bestVentilationWindow: null,
-  purifierSchedule: [],
-  hourlyAqi: [],
-  advisorySummary: '',
-};
-
-function calculateTotals(
-  allItems: RecommendationResult['items'],
-  completedActionIds: readonly string[],
-  baselineDoseUg: number
-) {
-  const activeItems = allItems.filter((i) =>
-    completedActionIds.includes(i.action.id)
-  );
-
-  const totalDoseReductionUg = activeItems.reduce(
-    (acc, i) => acc + i.dailyDoseReductionUg,
-    0
-  );
-  const totalCostRupees = activeItems.reduce(
-    (acc, i) => acc + i.action.costRupees,
-    0
-  );
-  const totalEmissionsSavedG = activeItems.reduce(
-    (acc, i) => acc + i.co2eSavedGramsPerDay,
-    0
-  );
-
-  const mitigatedDoseUg = Math.max(0, baselineDoseUg - totalDoseReductionUg);
-  const doseSavedPct =
-    baselineDoseUg > 0
-      ? Math.round((totalDoseReductionUg / baselineDoseUg) * 100)
-      : 0;
-
-  return {
-    activeCount: activeItems.length,
-    totalDoseReductionUg,
-    totalCostRupees,
-    totalEmissionsSavedG,
-    mitigatedDoseUg,
-    doseSavedPct,
-  };
-}
-
-interface HeaderProps {
-  readonly title: string;
-  readonly doseSavedPct: number;
-  readonly activeCount: number;
-  readonly estimateNote: string;
-}
-
-function CompareHeader({
-  title,
-  doseSavedPct,
-  activeCount,
-  estimateNote,
-}: HeaderProps): JSX.Element {
+function ScenarioPairGrid({
+  viewModel,
+  baselineTitle,
+  mitigatedTitle,
+  dict,
+  language,
+}: {
+  readonly viewModel: CompareViewModel;
+  readonly baselineTitle: string;
+  readonly mitigatedTitle: string;
+  readonly dict: CompareTranslations;
+  readonly language: Language;
+}): JSX.Element {
+  const { summary } = viewModel;
+  const locale = language === 'hi' ? 'hi-IN' : 'en-IN';
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-      <h2
-        id="compare-heading"
-        className="text-xl font-bold text-slate-900 dark:text-slate-50"
-      >
-        {title}
-      </h2>
-      <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
-        Compare modelled status quo and mitigated household exposure estimates
-        under stated IAQ assumptions.
-      </p>
-      <div className="mt-4 flex items-center gap-3">
-        <Badge severity="good" size="md">
-          -{doseSavedPct}% Total Inhaled Dose
-        </Badge>
-        <span className="text-xs text-slate-700 dark:text-slate-300">
-          Based on {activeCount} actions implemented
-        </span>
-      </div>
-      <p className="mt-2 text-xs text-slate-700 dark:text-slate-300">
-        {estimateNote}
-      </p>
+    <div className="grid gap-6 md:grid-cols-2">
+      <BaselineScenarioCard
+        baselineIndoorPm25={summary.baselineIndoorPm25}
+        baselineDoseUg={summary.baselineDoseUg}
+        title={baselineTitle}
+        dict={dict}
+        locale={locale}
+      />
+      <MitigatedScenarioCard
+        mitigatedIndoorPm25={summary.mitigatedIndoorPm25}
+        mitigatedDoseUg={summary.mitigatedDoseUg}
+        totalDoseReductionUg={viewModel.totalDoseReductionUg}
+        totalCostRupees={summary.totalCostRupees}
+        totalEmissionsSavedG={summary.totalCo2eSavedGrams}
+        baselineIndoorPm25={summary.baselineIndoorPm25}
+        activeCount={viewModel.activeCount}
+        title={mitigatedTitle}
+        dict={dict}
+        locale={locale}
+      />
     </div>
   );
 }
 
+function resolveActionPair(
+  catalog: readonly Action[],
+  choiceAId: string,
+  choiceBId: string
+): readonly [Action | undefined, Action | undefined] {
+  const choiceA = catalog.find((a) => a.id === choiceAId) ?? catalog[0];
+  const choiceB =
+    catalog.find((a) => a.id === choiceBId) ?? catalog[1] ?? catalog[0];
+  return [choiceA, choiceB];
+}
+
 /** Side-by-side comparative impact modeling evaluating baseline vs mitigated scenario outcomes. */
 export function ComparePanel(): JSX.Element {
-  const { profile, hourlySeries, completedActionIds, language } = useAppStore(
-    useShallow((s) => ({
-      profile: s.profile,
-      hourlySeries: s.hourlySeries,
-      completedActionIds: s.completedActionIds,
-      language: s.language,
-    }))
-  );
-  const t = getTranslations(language);
-
-  const outdoorPm25 = hourlySeries?.readings[12]?.pm25 ?? 180;
-  const baselineIndoorPm25 = Math.round(outdoorPm25 * 0.82);
-  const baselineDoseUg = Math.round(
-    profile.members.length * baselineIndoorPm25 * 16 * 0.5 +
-      profile.lifestyle.outdoorMinutesPerDay * outdoorPm25 * 0.02
-  );
-
-  const allItems = useMemo(() => {
-    const recRes = generateRecommendations(
-      profile,
-      MOCK_AQI,
-      MOCK_PLAN,
-      getActionCatalog()
+  const { profile, hourlySeries, selectedCity, completedActionIds, language } =
+    useAppStore(
+      useShallow((s) => ({
+        profile: s.profile,
+        hourlySeries: s.hourlySeries,
+        selectedCity: s.selectedCity,
+        completedActionIds: s.completedActionIds,
+        language: s.language,
+      }))
     );
-    return recRes.ok ? recRes.value.items : [];
-  }, [profile]);
 
-  const {
-    activeCount,
-    totalDoseReductionUg,
-    totalCostRupees,
-    totalEmissionsSavedG,
-    mitigatedDoseUg,
-    doseSavedPct,
-  } = useMemo(
-    () => calculateTotals(allItems, completedActionIds, baselineDoseUg),
-    [allItems, completedActionIds, baselineDoseUg]
+  const t = getTranslations(language);
+  const dict = getCompareTranslations(language);
+  const catalog = useMemo(() => getActionCatalog(), []);
+  const [choiceAId, setChoiceAId] = useState(DEFAULT_CHOICE_A_ID);
+  const [choiceBId, setChoiceBId] = useState(DEFAULT_CHOICE_B_ID);
+
+  const viewModel = useMemo(
+    () =>
+      buildCompareViewModel({
+        profile,
+        hourlySeries,
+        selectedCity,
+        completedActionIds,
+      }),
+    [profile, hourlySeries, selectedCity, completedActionIds]
   );
 
-  const mitigatedIndoorPm25 = Math.max(
-    25,
-    baselineIndoorPm25 - Math.round(totalDoseReductionUg * 0.05)
+  const [choiceA, choiceB] = resolveActionPair(catalog, choiceAId, choiceBId);
+  const liveOutdoorPm25 = aqiToPm25(viewModel.aqi.value);
+  const comparison = useMemo(
+    () =>
+      choiceA && choiceB
+        ? evaluateActionComparison({
+            choiceA,
+            choiceB,
+            aqi: viewModel.aqi,
+            profile,
+          })
+        : { doseDeltaUg: 0, emissionsDeltaGrams: 0, summary: '' },
+    [choiceA, choiceB, viewModel.aqi, profile]
   );
 
   return (
     <section aria-labelledby="compare-heading" className="space-y-6">
       <CompareHeader
         title={t.compare.title}
-        doseSavedPct={doseSavedPct}
-        activeCount={activeCount}
+        doseSavedPct={viewModel.doseSavedPct}
+        activeCount={viewModel.activeCount}
+        aqiValue={viewModel.aqi.value}
+        outdoorPm25={viewModel.summary.outdoorPm25}
         estimateNote={t.common.estimateNote}
+        dict={dict}
       />
-
-      <div className="grid gap-6 md:grid-cols-2">
-        <BaselineScenarioCard
-          baselineIndoorPm25={baselineIndoorPm25}
-          baselineDoseUg={baselineDoseUg}
-          title={t.compare.baseline}
+      <ScenarioPairGrid
+        viewModel={viewModel}
+        baselineTitle={t.compare.baseline}
+        mitigatedTitle={t.compare.mitigated}
+        dict={dict}
+        language={language}
+      />
+      {choiceA && choiceB ? (
+        <ActionComparisonPicker
+          actions={catalog}
+          choiceA={choiceA}
+          choiceB={choiceB}
+          onSelectA={setChoiceAId}
+          onSelectB={setChoiceBId}
+          comparison={comparison}
+          outdoorPm25={liveOutdoorPm25}
+          home={profile.home}
+          commuteKm={profile.lifestyle.commute.distanceKm}
+          language={language}
+          dict={dict}
         />
-        <MitigatedScenarioCard
-          mitigatedIndoorPm25={mitigatedIndoorPm25}
-          mitigatedDoseUg={mitigatedDoseUg}
-          totalDoseReductionUg={totalDoseReductionUg}
-          totalCostRupees={totalCostRupees}
-          totalEmissionsSavedG={totalEmissionsSavedG}
-          baselineIndoorPm25={baselineIndoorPm25}
-          activeCount={activeCount}
-          title={t.compare.mitigated}
-        />
-      </div>
+      ) : null}
+      <AssumptionsDisclosureCard
+        assumptions={viewModel.summary.assumptions}
+        language={language}
+        dict={dict}
+      />
     </section>
   );
 }

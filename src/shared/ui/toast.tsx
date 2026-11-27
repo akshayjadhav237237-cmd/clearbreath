@@ -5,6 +5,7 @@ export interface ToastProps {
   readonly message: string | null;
   readonly onDismiss: () => void;
   readonly durationMs?: number;
+  readonly dismissLabel?: string;
 }
 
 /** Non-intrusive notification toast announcing transient actions and status updates. */
@@ -12,6 +13,7 @@ export function Toast({
   message,
   onDismiss,
   durationMs = 3500,
+  dismissLabel = 'Dismiss notification',
 }: ToastProps): React.JSX.Element | null {
   useEffect(() => {
     if (!message) return undefined;
@@ -31,7 +33,7 @@ export function Toast({
       <button
         type="button"
         onClick={onDismiss}
-        aria-label="Dismiss notification"
+        aria-label={dismissLabel}
         className="rounded p-1 text-slate-400 hover:text-white focus:outline-none focus:ring-2 focus:ring-sky-400"
       >
         ✕

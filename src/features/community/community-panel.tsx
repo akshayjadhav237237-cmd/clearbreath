@@ -1,47 +1,54 @@
-import type { JSX } from 'react';
+import { useMemo, type JSX } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '../../app/store';
-import { calculateAqi } from '../../domain/aqi';
 import { Badge } from '../../shared/ui';
 import { getTranslations } from '../../shared/i18n';
-import type { AqiResult } from '../../domain/contracts';
+import {
+  formatCommunityBroadcast,
+  getShellDict,
+} from '../../shared/i18n/shell-dict';
+import { selectCurrentAqi, selectDayPlan } from '../../shared/state/selectors';
 
 /** Generates shareable air quality advisories for residential welfare associations and community groups. */
 export function CommunityPanel(): JSX.Element {
-  const { selectedCity, hourlySeries, showToast, language } = useAppStore(
-    useShallow((s) => ({
-      selectedCity: s.selectedCity,
-      hourlySeries: s.hourlySeries,
-      showToast: s.showToast,
-      language: s.language,
-    }))
-  );
+  const { selectedCity, hourlySeries, profile, showToast, language } =
+    useAppStore(
+      useShallow((s) => ({
+        selectedCity: s.selectedCity,
+        hourlySeries: s.hourlySeries,
+        profile: s.profile,
+        showToast: s.showToast,
+        language: s.language,
+      }))
+    );
   const t = getTranslations(language);
+  const shell = getShellDict(language);
 
-  const sampleReading = hourlySeries?.readings[12];
-  const aqiCalculation = calculateAqi(
-    sampleReading ?? { hour: 12, pm25: 160, pm10: 260 }
+  const aqi = useMemo(
+    () => selectCurrentAqi({ selectedCity, hourlySeries, profile }),
+    [selectedCity, hourlySeries, profile]
   );
-  const aqi: AqiResult = aqiCalculation.ok
-    ? aqiCalculation.value
-    : { value: 160, category: 'moderate', dominant: 'pm25' };
+  const dayPlan = useMemo(
+    () => selectDayPlan({ selectedCity, hourlySeries, profile }),
+    [selectedCity, hourlySeries, profile]
+  );
 
-  const broadcastText =
-    `📢 *Clearbreath Neighborhood Air Advisory — ${selectedCity}*\n\n` +
-    `⚠️ Current AQI: *${aqi.value} (${aqi.category.toUpperCase()})*\n` +
-    `☀️ Optimal Outdoor Hours: *12:00 PM – 3:00 PM*\n\n` +
-    `*Top Community Actions Today:*\n` +
-    `1. 🚫 Prohibit open biomass or dry leaf burning in society grounds.\n` +
-    `2. 🚗 Opt for carpooling or Metro to eliminate 2.4 kg CO2e per trip.\n` +
-    `3. 🧹 Use wet-mopping rather than dry-sweeping in common corridors.\n\n` +
-    `_Powered by Clearbreath • CPCB & EPA Clean Air Models_`;
+  const categoryLabel = t.severity[aqi.category];
+  const bestWin = dayPlan.outdoorWindows[0];
+  const broadcastText = formatCommunityBroadcast({
+    language,
+    city: selectedCity,
+    aqiValue: aqi.value,
+    categoryLabel,
+    ...(bestWin ? { outdoorWindow: bestWin } : {}),
+  });
 
   const handleCopy = async () => {
     try {
       await navigator.clipboard.writeText(broadcastText);
       showToast(t.community.copiedNotice);
     } catch {
-      showToast('Could not access clipboard.');
+      showToast(shell.clipboardError);
     }
   };
 
@@ -64,13 +71,13 @@ export function CommunityPanel(): JSX.Element {
           <div className="flex items-center gap-2">
             <span className="text-lg">📢</span>
             <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-              WhatsApp / RWA Broadcast Draft
+              {shell.draftHeading}
             </h3>
           </div>
-          <Badge severity={aqi.category}>{aqi.category.toUpperCase()}</Badge>
+          <Badge severity={aqi.category}>{categoryLabel}</Badge>
         </div>
 
-        <pre className="mt-4 whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-4 font-mono text-xs text-slate-800 shadow-inner dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200 leading-relaxed">
+        <pre className="mt-4 whitespace-pre-wrap rounded-xl border border-slate-200 bg-white p-4 font-mono text-xs leading-relaxed text-slate-800 shadow-inner dark:border-slate-800 dark:bg-slate-900 dark:text-slate-200">
           {broadcastText}
         </pre>
 

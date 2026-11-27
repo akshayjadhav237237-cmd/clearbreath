@@ -1,4 +1,5 @@
 import type { StoragePort } from '../shared/ports';
+import { getShellDict } from '../shared/i18n/shell-dict';
 import { useAppStore } from './store';
 import {
   loadPersistedState,
@@ -25,11 +26,8 @@ function hydrateInitialState(storage: StoragePort): void {
     code === 'MIGRATION_FAILED' ||
     code === 'PAYLOAD_TOO_LARGE'
   ) {
-    useAppStore
-      .getState()
-      .showToast(
-        'Corrupted or incompatible stored data reset to default family profile.'
-      );
+    const lang = useAppStore.getState().language;
+    useAppStore.getState().showToast(getShellDict(lang).resetToast);
   }
 }
 

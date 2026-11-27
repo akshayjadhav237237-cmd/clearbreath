@@ -1,9 +1,9 @@
-import { lazy, Suspense, useEffect, type JSX } from 'react';
-import { useShallow } from 'zustand/react/shallow';
+import { lazy, Suspense, useEffect, useMemo, type JSX } from 'react';
 import { useAppStore, type NavigationTab } from './store';
-import { APP_NAME } from '../config/constants';
 import { getTranslations } from '../shared/i18n';
-import { Toast, SegmentedControl, ErrorBoundary } from '../shared/ui';
+import { getShellDict } from '../shared/i18n/shell-dict';
+import { selectCurrentAqi } from '../shared/state/selectors';
+import { Badge, Toast, SegmentedControl, ErrorBoundary } from '../shared/ui';
 import { AirNowPanel } from '../features/air-now';
 
 const HouseholdPanel = lazy(() =>
@@ -27,44 +27,64 @@ const CommunityPanel = lazy(() =>
   import('../features/community').then((m) => ({ default: m.CommunityPanel }))
 );
 
-/** Header component presenting application branding, bilingual controls, and theme toggle. */
+const NAV_TABS: readonly NavigationTab[] = [
+  'airNow',
+  'household',
+  'plan',
+  'actions',
+  'compare',
+  'assistant',
+  'community',
+];
+
+const LANG_OPTIONS = [
+  { value: 'en' as const, label: 'EN' },
+  { value: 'hi' as const, label: 'हिन्दी' },
+];
+
 function AppHeader(): JSX.Element {
-  const { language, setLanguage, theme, toggleTheme } = useAppStore(
-    useShallow((s) => ({
-      language: s.language,
-      setLanguage: s.setLanguage,
-      theme: s.theme,
-      toggleTheme: s.toggleTheme,
-    }))
+  const {
+    language,
+    setLanguage,
+    theme,
+    toggleTheme,
+    selectedCity,
+    hourlySeries,
+    profile,
+  } = useAppStore();
+  const t = getTranslations(language);
+  const shell = getShellDict(language);
+  const aqi = useMemo(
+    () => selectCurrentAqi({ selectedCity, hourlySeries, profile }),
+    [selectedCity, hourlySeries, profile]
   );
-  const langOptions = [
-    { value: 'en' as const, label: 'EN' },
-    { value: 'hi' as const, label: 'हिन्दी' },
-  ];
 
   return (
     <header className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-      <div className="mx-auto flex max-w-5xl items-center justify-between px-4 py-3 sm:px-6">
+      <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-2 px-4 py-3 sm:px-6">
         <div>
           <h1 className="text-lg font-extrabold tracking-tight text-slate-900 dark:text-slate-50">
-            {APP_NAME}
+            {t.appName}
           </h1>
           <p className="text-[11px] text-slate-700 dark:text-slate-300">
-            Winter Smog Assistant
+            {shell.subtitle}
           </p>
         </div>
         <div className="flex items-center gap-3">
+          <Badge severity={aqi.category}>
+            {shell.aqiLabel} {aqi.value} ({t.severity[aqi.category]})
+          </Badge>
           <SegmentedControl
-            options={langOptions}
+            options={LANG_OPTIONS}
             value={language}
             onChange={setLanguage}
-            ariaLabel="Language Selector"
+            ariaLabel={shell.langAria}
             size="sm"
           />
           <button
             type="button"
             onClick={toggleTheme}
-            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} theme`}
+            aria-label={theme === 'light' ? shell.toDark : shell.toLight}
             className="rounded-lg border border-slate-200 p-[6px] text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-800 dark:text-slate-300 dark:hover:bg-slate-800"
           >
             {theme === 'light' ? '🌙' : '☀️'}
@@ -75,45 +95,29 @@ function AppHeader(): JSX.Element {
   );
 }
 
-/** Primary tab navigation bar for switching between vertical domain views. */
 function AppNav(): JSX.Element {
-  const { activeTab, setActiveTab, language } = useAppStore(
-    useShallow((s) => ({
-      activeTab: s.activeTab,
-      setActiveTab: s.setActiveTab,
-      language: s.language,
-    }))
-  );
+  const { activeTab, setActiveTab, language } = useAppStore();
   const t = getTranslations(language);
-
-  const tabs: readonly { id: NavigationTab; label: string }[] = [
-    { id: 'airNow', label: t.nav.airNow },
-    { id: 'household', label: t.nav.household },
-    { id: 'plan', label: t.nav.plan },
-    { id: 'actions', label: t.nav.actions },
-    { id: 'compare', label: t.nav.compare },
-    { id: 'assistant', label: t.nav.assistant },
-    { id: 'community', label: t.nav.community },
-  ];
+  const shell = getShellDict(language);
 
   return (
     <nav
-      aria-label="Main Navigation"
+      aria-label={shell.navAria}
       className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
     >
-      <div className="mx-auto flex max-w-5xl overflow-x-auto px-4 sm:px-6 scrollbar-none">
-        {tabs.map((tab) => (
+      <div className="scrollbar-none mx-auto flex max-w-5xl overflow-x-auto px-4 sm:px-6">
+        {NAV_TABS.map((id) => (
           <button
-            key={tab.id}
+            key={id}
             type="button"
-            onClick={() => setActiveTab(tab.id)}
+            onClick={() => setActiveTab(id)}
             className={`whitespace-nowrap border-b-2 px-3 py-2.5 text-xs font-bold transition-colors ${
-              activeTab === tab.id
+              activeTab === id
                 ? 'border-sky-700 text-sky-700 dark:border-sky-400 dark:text-sky-400'
                 : 'border-transparent text-slate-700 hover:border-slate-300 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100'
             }`}
           >
-            {tab.label}
+            {t.nav[id]}
           </button>
         ))}
       </div>
@@ -123,22 +127,22 @@ function AppNav(): JSX.Element {
 
 /** Top-level application shell component routing vertical feature slices. */
 export function App(): JSX.Element {
-  const activeTab = useAppStore((s) => s.activeTab);
-  const toastMessage = useAppStore((s) => s.toastMessage);
-  const hideToast = useAppStore((s) => s.hideToast);
-  const theme = useAppStore((s) => s.theme);
+  const { activeTab, toastMessage, hideToast, theme, language } = useAppStore();
+  const shell = getShellDict(language);
+  const t = getTranslations(language);
 
   useEffect(() => {
     document.documentElement.classList.toggle('dark', theme === 'dark');
-  }, [theme]);
+    document.documentElement.lang = language;
+  }, [theme, language]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="flex min-h-screen flex-col bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
       <a
         href="#main-content"
         className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded focus:bg-sky-700 focus:px-4 focus:py-2 focus:text-white"
       >
-        Skip to main content
+        {shell.skipLink}
       </a>
       <AppHeader />
       <AppNav />
@@ -147,7 +151,10 @@ export function App(): JSX.Element {
         tabIndex={-1}
         className="mx-auto w-full max-w-5xl flex-1 px-4 py-6 sm:px-6"
       >
-        <ErrorBoundary>
+        <ErrorBoundary
+          fallbackTitle={t.common.errorTitle}
+          fallbackMessage={t.common.errorDesc}
+        >
           <Suspense
             fallback={
               <div
@@ -155,7 +162,7 @@ export function App(): JSX.Element {
                 aria-live="polite"
                 className="p-8 text-center text-xs text-slate-700 dark:text-slate-300"
               >
-                Loading view...
+                {shell.loading}
               </div>
             }
           >
@@ -170,12 +177,13 @@ export function App(): JSX.Element {
         </ErrorBoundary>
       </main>
       <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-700 dark:border-slate-800 dark:bg-slate-900 dark:text-slate-300">
-        <p>
-          &copy; 2026 Clearbreath • CPCB NAQI & EPA Mass-Balance Air Quality
-          Models
-        </p>
+        <p>{shell.footer}</p>
       </footer>
-      <Toast message={toastMessage} onDismiss={hideToast} />
+      <Toast
+        message={toastMessage}
+        onDismiss={hideToast}
+        dismissLabel={t.common.dismissToast}
+      />
     </div>
   );
 }

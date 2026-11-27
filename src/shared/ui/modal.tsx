@@ -6,6 +6,7 @@ export interface ModalProps {
   readonly onClose: () => void;
   readonly title: string;
   readonly children: React.ReactNode;
+  readonly closeLabel?: string;
 }
 
 /** Accessible dialog modal overlay with keyboard dismissal and focus isolation. */
@@ -14,6 +15,7 @@ export function Modal({
   onClose,
   title,
   children,
+  closeLabel = 'Close dialog',
 }: ModalProps): React.JSX.Element | null {
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -49,7 +51,7 @@ export function Modal({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close dialog"
+            aria-label={closeLabel}
             className="rounded-lg p-[6px] text-slate-700 hover:bg-slate-100 hover:text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-slate-100"
           >
             ✕

@@ -10,6 +10,7 @@ interface AirNowHeaderProps {
   readonly aqi: AqiResult;
   readonly isSample: boolean;
   readonly guidance: string;
+  readonly aqiLabel: string;
   readonly t: ReturnType<typeof getTranslations>;
 }
 
@@ -20,6 +21,7 @@ export function AirNowHeader({
   aqi,
   isSample,
   guidance,
+  aqiLabel,
   t,
 }: AirNowHeaderProps): JSX.Element {
   return (
@@ -34,7 +36,7 @@ export function AirNowHeader({
           </h2>
           <div className="mt-2 flex items-center gap-2">
             <Badge severity={aqi.category} size="md">
-              {aqi.category.toUpperCase()} (AQI {aqi.value})
+              {t.severity[aqi.category]} ({aqiLabel} {aqi.value})
             </Badge>
             <Badge severity={isSample ? 'neutral' : 'info'}>
               {isSample ? t.airNow.sampleBadge : t.airNow.liveBadge}

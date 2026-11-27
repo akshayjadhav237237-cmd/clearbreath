@@ -65,7 +65,12 @@ export const useAppStore = create<AppState>((set) => ({
   setLanguage: (language) => set({ language }),
   toggleTheme: () =>
     set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
-  setSelectedCity: (selectedCity) => set({ selectedCity }),
+  setSelectedCity: (selectedCity) =>
+    set((state) => ({
+      selectedCity,
+      hourlySeries:
+        state.hourlySeries?.city === selectedCity ? state.hourlySeries : null,
+    })),
   setProfile: (profile) => set({ profile, activePreset: 'custom' }),
   loadPreset: (key) => set({ profile: PRESETS[key], activePreset: key }),
   toggleActionCompleted: (actionId) =>

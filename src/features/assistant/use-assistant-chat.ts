@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { AqiResult, HouseholdProfile } from '../../domain/contracts';
 import type { GroundingFact, Language } from '../../ai/contracts';
 import { buildLlmSafeContext } from '../../ai/privacy';
@@ -6,6 +6,7 @@ import { AiOrchestrator } from '../../ai/orchestrator';
 import { ApiKeyHolder } from '../../ai/key-holder';
 import { LocalProvider } from '../../ai/providers/local-provider';
 import { determineHouseholdSensitivity } from '../../domain/profile';
+import { getShellDict } from '../../shared/i18n/shell-dict';
 import {
   SystemClock,
   SystemFetchPort,
@@ -27,7 +28,7 @@ interface ChatOptions {
 const DEFAULT_MESSAGE: ChatMessage = {
   id: 'welcome',
   sender: 'assistant',
-  text: 'Hello! I am Clearbreath, your winter smog assistant.',
+  text: '',
   source: 'local',
 };
 
@@ -57,9 +58,41 @@ function toAssistantMessage(
   };
 }
 
+async function queryAssistant(
+  orchestrator: AiOrchestrator,
+  options: ChatOptions,
+  qText: string,
+  signal: AbortSignal
+): Promise<ChatMessage | null> {
+  const ctx = buildLlmSafeContext({
+    profile: options.profile,
+    aqi: options.aqi,
+    sensitivityLevel: determineHouseholdSensitivity(options.profile.members),
+    city: options.city,
+    facts: options.facts,
+    question: qText,
+    language: options.language,
+  });
+  const res = await orchestrator.getAnswer(ctx, {
+    consent: options.aiConsent,
+    signal,
+  });
+  if (signal.aborted || !res.ok) return null;
+  return toAssistantMessage(
+    res.value.data,
+    res.value.source,
+    res.value.fallbackReason
+  );
+}
+
+function syncKeyHolder(keyHolder: ApiKeyHolder, apiKey?: string): void {
+  if (apiKey) keyHolder.setKey(apiKey);
+  else keyHolder.clear();
+}
+
 /** Custom hook managing conversational turn state, context allowlisting, and AI invocation. */
 export function useAssistantChat(options: ChatOptions) {
-  const { profile, aqi, city, facts, aiConsent, language, apiKey } = options;
+  const { language, apiKey } = options;
   const keyHolderRef = useRef(new ApiKeyHolder());
   const orchestratorRef = useRef<AiOrchestrator | null>(null);
   const abortRef = useRef<AbortController | null>(null);
@@ -71,6 +104,15 @@ export function useAssistantChat(options: ChatOptions) {
 
   useEffect(() => () => abortRef.current?.abort(), []);
 
+  const welcomeText = getShellDict(language).welcome;
+  const localizedMessages = useMemo(
+    () =>
+      messages.map((m) =>
+        m.id === 'welcome' ? { ...m, text: welcomeText } : m
+      ),
+    [messages, welcomeText]
+  );
+
   const sendMessage = async (qText: string) => {
     if (!qText.trim() || isLoading) return;
     setMessages((prev) => [
@@ -79,38 +121,29 @@ export function useAssistantChat(options: ChatOptions) {
     ]);
     setInput('');
     setIsLoading(true);
-    const safeCtx = buildLlmSafeContext({
-      profile,
-      aqi,
-      sensitivityLevel: determineHouseholdSensitivity(profile.members),
-      city,
-      facts,
-      question: qText,
-      language,
-    });
-    if (apiKey) keyHolderRef.current.setKey(apiKey);
-    else keyHolderRef.current.clear();
-    if (!orchestratorRef.current) {
-      orchestratorRef.current = buildOrchestrator(keyHolderRef.current);
-    }
+    syncKeyHolder(keyHolderRef.current, apiKey);
+    const orchestrator =
+      orchestratorRef.current ?? buildOrchestrator(keyHolderRef.current);
+    orchestratorRef.current = orchestrator;
     abortRef.current?.abort();
     const controller = new AbortController();
     abortRef.current = controller;
-    const res = await orchestratorRef.current.getAnswer(safeCtx, {
-      consent: aiConsent,
-      signal: controller.signal,
-    });
+    const reply = await queryAssistant(
+      orchestrator,
+      options,
+      qText,
+      controller.signal
+    );
     if (controller.signal.aborted) return;
     setIsLoading(false);
-    if (res.ok) {
-      const msg = toAssistantMessage(
-        res.value.data,
-        res.value.source,
-        res.value.fallbackReason
-      );
-      setMessages((prev) => [...prev, msg]);
-    }
+    if (reply) setMessages((prev) => [...prev, reply]);
   };
 
-  return { messages, input, setInput, isLoading, sendMessage };
+  return {
+    messages: localizedMessages,
+    input,
+    setInput,
+    isLoading,
+    sendMessage,
+  };
 }

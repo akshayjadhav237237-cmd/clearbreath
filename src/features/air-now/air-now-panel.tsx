@@ -1,16 +1,24 @@
-import { useEffect, type JSX } from 'react';
+import { useEffect, useMemo, type JSX } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { AIR_DATA_TIMEOUT_MS } from '../../config';
 import { useAppStore, type AppState } from '../../app/store';
-import { calculateAqi, getAqiGuidance } from '../../domain/aqi';
+import { getAqiGuidance } from '../../domain/aqi';
 import { determineHouseholdSensitivity } from '../../domain/profile';
 import { MetricCard } from '../../shared/ui';
 import { getTranslations } from '../../shared/i18n';
+import {
+  getLocalizedGuidance,
+  getShellDict,
+  type ShellDict,
+} from '../../shared/i18n/shell-dict';
+import {
+  selectCurrentAqi,
+  selectCurrentReading,
+} from '../../shared/state/selectors';
 import { fetchAirDataWithFallback } from '../../ai/airdata/fallback-chain';
 import { OpenMeteoProvider } from '../../ai/airdata/open-meteo-provider';
 import { SampleProvider } from '../../ai/airdata/sample-provider';
 import { SystemClock, SystemFetchPort } from '../../shared/system-ports';
-import { OPEN_METEO_ATTRIBUTION_TEXT } from '../../config/constants';
 import type { AqiResult, HourlyReading } from '../../domain/contracts';
 import { AirNowHeader } from './air-now-header';
 
@@ -18,33 +26,38 @@ interface MetricsProps {
   readonly currentReading: HourlyReading;
   readonly aqi: AqiResult;
   readonly t: ReturnType<typeof getTranslations>;
+  readonly shell: ShellDict;
 }
 
-function AirNowMetrics({ currentReading, aqi, t }: MetricsProps): JSX.Element {
+function AirNowMetrics({
+  currentReading,
+  aqi,
+  t,
+  shell,
+}: MetricsProps): JSX.Element {
   return (
     <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
       <MetricCard
         label={t.airNow.pm25}
         value={currentReading.pm25}
-        unit="µg/m³"
-        tooltip="CPCB NAQI 24h average breakpoint model"
+        unit={t.common.ugm3}
+        tooltip={shell.pm25Tip}
       />
       <MetricCard
         label={t.airNow.pm10}
         value={currentReading.pm10}
-        unit="µg/m³"
-        tooltip="Inhalable coarse particle concentration"
+        unit={t.common.ugm3}
+        tooltip={shell.pm10Tip}
       />
       <MetricCard
         label={t.airNow.dominant}
-        value={aqi.dominant === 'pm25' ? 'PM2.5' : 'PM10'}
-        tooltip="Governs total AQI value via highest sub-index"
+        value={aqi.dominant === 'pm25' ? shell.pm25Label : shell.pm10Label}
+        tooltip={shell.dominantTip}
       />
     </div>
   );
 }
 
-/** Interactive ambient air quality monitoring panel showing diurnal particulates and CPCB indices. */
 async function fetchCitySeries(city: string, signal: AbortSignal) {
   const live = new OpenMeteoProvider(new SystemFetchPort(), new SystemClock());
   const sample = new SampleProvider(
@@ -95,7 +108,7 @@ function useAirNowLoader(
 
 /** Ambient air quality dashboard panel supporting live city telemetry and sample presets. */
 export function AirNowPanel(): JSX.Element {
-  const {
+  const [
     selectedCity,
     setSelectedCity,
     hourlySeries,
@@ -103,32 +116,37 @@ export function AirNowPanel(): JSX.Element {
     setAirDataLoading,
     profile,
     language,
-  } = useAppStore(
-    useShallow((s) => ({
-      selectedCity: s.selectedCity,
-      setSelectedCity: s.setSelectedCity,
-      hourlySeries: s.hourlySeries,
-      setHourlySeries: s.setHourlySeries,
-      setAirDataLoading: s.setAirDataLoading,
-      profile: s.profile,
-      language: s.language,
-    }))
+  ] = useAppStore(
+    useShallow((s) => [
+      s.selectedCity,
+      s.setSelectedCity,
+      s.hourlySeries,
+      s.setHourlySeries,
+      s.setAirDataLoading,
+      s.profile,
+      s.language,
+    ])
   );
   const t = getTranslations(language);
+  const shell = getShellDict(language);
 
   useAirNowLoader(selectedCity, setAirDataLoading, setHourlySeries);
 
-  const currentReading = hourlySeries?.readings[12] ?? {
-    hour: 12,
-    pm25: 180,
-    pm10: 290,
-  };
-  const aqiRes = calculateAqi(currentReading);
-  const aqi: AqiResult = aqiRes.ok
-    ? aqiRes.value
-    : { value: 180, category: 'moderate', dominant: 'pm25' };
+  const currentReading = useMemo(
+    () => selectCurrentReading({ selectedCity, hourlySeries, profile }),
+    [selectedCity, hourlySeries, profile]
+  );
+  const aqi = useMemo(
+    () => selectCurrentAqi({ selectedCity, hourlySeries, profile }),
+    [selectedCity, hourlySeries, profile]
+  );
   const sensitivity = determineHouseholdSensitivity(profile.members);
-  const guidance = getAqiGuidance(aqi.category, sensitivity);
+  const guidance = getLocalizedGuidance(
+    language,
+    aqi.category,
+    sensitivity,
+    getAqiGuidance(aqi.category, sensitivity)
+  );
 
   return (
     <section aria-labelledby="airnow-heading" className="space-y-6">
@@ -138,9 +156,15 @@ export function AirNowPanel(): JSX.Element {
         aqi={aqi}
         isSample={Boolean(hourlySeries?.isSample)}
         guidance={guidance}
+        aqiLabel={shell.aqiLabel}
         t={t}
       />
-      <AirNowMetrics currentReading={currentReading} aqi={aqi} t={t} />
+      <AirNowMetrics
+        currentReading={currentReading}
+        aqi={aqi}
+        t={t}
+        shell={shell}
+      />
 
       <div className="text-center text-[11px] text-slate-700 dark:text-slate-300">
         <a
@@ -149,7 +173,7 @@ export function AirNowPanel(): JSX.Element {
           rel="noreferrer"
           className="underline hover:text-slate-900 dark:hover:text-slate-100"
         >
-          {OPEN_METEO_ATTRIBUTION_TEXT}
+          {shell.attribution}
         </a>
       </div>
     </section>

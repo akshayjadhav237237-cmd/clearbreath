@@ -1,8 +1,12 @@
 import type { JSX } from 'react';
+import { useAppStore } from '../../app/store';
 import type { DailyPlan, RecommendationResult } from '../../domain/contracts';
+import type { Language } from '../../shared/i18n';
+import { getPlanDict, type PlanDict } from '../../shared/i18n/plan-dict';
 import { usePlanExports } from './use-plan-exports';
 
 interface ActionButtonsProps {
+  readonly labels: PlanDict['exports'];
   readonly onExportCsv: () => void;
   readonly onExportIcs: () => void;
   readonly onExportJson: () => void;
@@ -11,6 +15,7 @@ interface ActionButtonsProps {
 }
 
 function ActionButtons({
+  labels,
   onExportCsv,
   onExportIcs,
   onExportJson,
@@ -25,42 +30,42 @@ function ActionButtons({
       <button
         type="button"
         onClick={onExportCsv}
-        aria-label="Export CSV"
+        aria-label={labels.exportCsv}
         className={btnClass}
       >
-        Export CSV
+        {labels.exportCsv}
       </button>
       <button
         type="button"
         onClick={onExportIcs}
-        aria-label="Export Calendar"
+        aria-label={labels.exportCalendar}
         className={btnClass}
       >
-        Export Calendar
+        {labels.exportCalendar}
       </button>
       <button
         type="button"
         onClick={onExportJson}
-        aria-label="Backup Profile"
+        aria-label={labels.backupProfile}
         className={btnClass}
       >
-        Backup Profile
+        {labels.backupProfile}
       </button>
       <button
         type="button"
         onClick={onImportClick}
-        aria-label="Restore Profile"
+        aria-label={labels.restoreProfile}
         className={btnClass}
       >
-        Restore Profile
+        {labels.restoreProfile}
       </button>
       <button
         type="button"
         onClick={onPrint}
-        aria-label="Print Family Plan"
+        aria-label={labels.printFamilyPlan}
         className="rounded-lg bg-sky-700 px-3.5 py-[6px] text-xs font-bold text-white hover:bg-sky-800"
       >
-        Print Family Plan
+        {labels.printFamilyPlan}
       </button>
     </div>
   );
@@ -71,6 +76,7 @@ export interface PlanExportBarProps {
   readonly plan: DailyPlan;
   readonly recommendations?: RecommendationResult;
   readonly onPrint: () => void;
+  readonly language?: Language;
 }
 
 /** Accessible export, backup, and print toolbar with live-region status announcements. */
@@ -78,7 +84,11 @@ export function PlanExportBar({
   plan,
   recommendations,
   onPrint,
+  language,
 }: PlanExportBarProps): JSX.Element {
+  const storeLanguage = useAppStore((s) => s.language);
+  const activeLanguage = language ?? storeLanguage;
+  const dict = getPlanDict(activeLanguage);
   const {
     statusMessage,
     fileInputRef,
@@ -86,21 +96,21 @@ export function PlanExportBar({
     handleExportIcs,
     handleExportJson,
     handleImportJson,
-  } = usePlanExports(plan, recommendations);
+  } = usePlanExports(plan, recommendations, activeLanguage);
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900 print:hidden">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100">
-            Export &amp; Print Routine
+            {dict.exports.heading}
           </h3>
           <p className="text-xs text-slate-600 dark:text-slate-400">
-            Save schedule to calendar, export CSV data, or print family advisory
-            card.
+            {dict.exports.subtitle}
           </p>
         </div>
         <ActionButtons
+          labels={dict.exports}
           onExportCsv={handleExportCsv}
           onExportIcs={handleExportIcs}
           onExportJson={handleExportJson}
@@ -111,7 +121,7 @@ export function PlanExportBar({
           ref={fileInputRef}
           type="file"
           accept=".json,application/json"
-          aria-label="Upload JSON Profile Backup"
+          aria-label={dict.exports.uploadAriaLabel}
           className="sr-only"
           onChange={handleImportJson}
         />

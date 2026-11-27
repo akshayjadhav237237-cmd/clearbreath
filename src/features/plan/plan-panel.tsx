@@ -1,74 +1,62 @@
 import { useMemo, type JSX } from 'react';
 import { useShallow } from 'zustand/react/shallow';
 import { useAppStore } from '../../app/store';
-import { generateDailyPlan } from '../../domain/planner';
-import { determineHouseholdSensitivity } from '../../domain/profile';
+import { getActionCatalog } from '../../domain/actions';
+import { generateRecommendations } from '../../domain/recommend';
 import { getTranslations } from '../../shared/i18n';
+import { getPlanDict } from '../../shared/i18n/plan-dict';
+import { selectAqiAndPlan } from '../../shared/state/selectors';
 import { SystemClock } from '../../shared/system-ports';
-import type { DailyPlan, HourlyReading } from '../../domain/contracts';
+import type { HourlyReading } from '../../domain/contracts';
 import { DiurnalChart } from './diurnal-chart';
 import { PlanExportBar } from './plan-export-bar';
 import { PlanMetrics } from './plan-metrics';
 import { SmogDayPlanPrint } from '../print';
 
-const FALLBACK_READINGS: readonly HourlyReading[] = Array.from(
-  { length: 24 },
-  (_, i) => ({
-    hour: i,
-    pm25: i >= 11 && i <= 16 ? 95 : 240,
-    pm10: i >= 11 && i <= 16 ? 160 : 380,
-  })
-);
-
-const FALLBACK_PLAN: DailyPlan = {
-  outdoorWindows: [{ startHour: 12, endHour: 15, averageAqi: 120 }],
-  bestVentilationWindow: { startHour: 13, endHour: 14 },
-  purifierSchedule: Array.from({ length: 24 }, (_, h) => ({
-    hour: h,
-    operationalState: h >= 20 || h <= 8 ? 'high' : 'low',
-  })),
-  hourlyAqi: [],
-  advisorySummary: 'Exercise caution during peak evening hours.',
-};
-
-const FALLBACK_WINDOW = { startHour: 12, endHour: 15, averageAqi: 120 };
+function getValidReadings(
+  readings?: readonly HourlyReading[]
+): readonly HourlyReading[] {
+  if (!readings || readings.length === 0) return [];
+  const hasInvalid = readings.some(
+    (r) =>
+      !Number.isFinite(r.pm25) ||
+      r.pm25 < 0 ||
+      !Number.isFinite(r.pm10) ||
+      r.pm10 < 0
+  );
+  return hasInvalid ? [] : readings;
+}
 
 /** Interactive 24-hour diurnal particulate curve and mitigation scheduling advisory panel. */
 export function PlanPanel(): JSX.Element {
-  const { hourlySeries, profile, language } = useAppStore(
+  const { selectedCity, hourlySeries, profile, language } = useAppStore(
     useShallow((s) => ({
+      selectedCity: s.selectedCity,
       hourlySeries: s.hourlySeries,
       profile: s.profile,
       language: s.language,
     }))
   );
   const t = getTranslations(language);
+  const dict = getPlanDict(language);
 
-  const readings: readonly HourlyReading[] =
-    hourlySeries?.readings ?? FALLBACK_READINGS;
-
-  const plan = useMemo((): DailyPlan => {
-    const sensitivity = determineHouseholdSensitivity(profile.members);
-    const planRes = generateDailyPlan(readings, sensitivity, profile.lifestyle);
-    return planRes.ok ? planRes.value : FALLBACK_PLAN;
-  }, [readings, profile.members, profile.lifestyle]);
-
-  const bestWindow = plan.outdoorWindows[0] ?? FALLBACK_WINDOW;
+  const { aqi, plan } = useMemo(
+    () => selectAqiAndPlan({ selectedCity, hourlySeries, profile }),
+    [selectedCity, hourlySeries, profile]
+  );
+  const recommendations = useMemo(() => {
+    const res = generateRecommendations(profile, aqi, plan, getActionCatalog());
+    return res.ok ? res.value : undefined;
+  }, [profile, aqi, plan]);
+  const validReadings = useMemo(
+    () => getValidReadings(hourlySeries?.readings),
+    [hourlySeries]
+  );
   const maxPm25 = useMemo(
-    () => readings.reduce((mx, r) => (r.pm25 > mx ? r.pm25 : mx), 0),
-    [readings]
+    () => validReadings.reduce((mx, r) => (r.pm25 > mx ? r.pm25 : mx), 0),
+    [validReadings]
   );
-  const peakAqi = useMemo(
-    () =>
-      plan.hourlyAqi.reduce(
-        (best, cur) => (cur.value > best.value ? cur : best),
-        plan.hourlyAqi[0] ?? {
-          value: bestWindow.averageAqi,
-          category: 'severe' as const,
-        }
-      ),
-    [plan.hourlyAqi, bestWindow.averageAqi]
-  );
+  const bestWindow = plan.outdoorWindows[0] ?? null;
   const todayIsoDate = useMemo(
     () => new Date(new SystemClock().now()).toISOString().slice(0, 10),
     []
@@ -87,13 +75,14 @@ export function PlanPanel(): JSX.Element {
           {t.plan.title}
         </h2>
         <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
-          Lower-pollution outdoor windows, ventilation slots, and purifier
-          schedules derived from diurnal AQI trends and household sensitivity.
+          {dict.panel.subtitle}
         </p>
         <DiurnalChart
-          readings={readings}
+          readings={validReadings}
+          hourlyAqi={plan.hourlyAqi}
           bestWindow={bestWindow}
           maxPm25={maxPm25}
+          language={language}
         />
       </div>
       <PlanMetrics
@@ -101,15 +90,22 @@ export function PlanPanel(): JSX.Element {
         ventWindow={plan.bestVentilationWindow}
         purifierSchedule={plan.purifierSchedule}
         t={t}
+        dict={dict}
       />
-      <PlanExportBar plan={plan} onPrint={handlePrint} />
+      <PlanExportBar
+        plan={plan}
+        {...(recommendations ? { recommendations } : {})}
+        onPrint={handlePrint}
+        language={language}
+      />
       <SmogDayPlanPrint
         profile={profile}
         plan={plan}
-        currentAqi={peakAqi.value}
-        aqiCategory={peakAqi.category}
+        currentAqi={aqi.value}
+        aqiCategory={aqi.category}
         dateFormatted={todayIsoDate}
         onPrint={handlePrint}
+        language={language}
       />
     </section>
   );

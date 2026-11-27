@@ -1,10 +1,16 @@
 import { useState, type JSX } from 'react';
 import type { HomeProfile } from '../../domain/contracts';
+import {
+  getHouseholdSpecDict,
+  type HouseholdSpecDict,
+} from '../../shared/i18n/household-dict';
 
 interface HouseholdHomeSpecsProps {
   readonly home: HomeProfile;
   readonly budgetRupees: number;
   readonly title: string;
+  readonly budgetTitle?: string;
+  readonly specDict?: HouseholdSpecDict;
   readonly onBudgetChange: (newBudget: number) => void;
 }
 
@@ -13,6 +19,8 @@ export function HouseholdHomeSpecs({
   home,
   budgetRupees,
   title,
+  budgetTitle = 'Monthly Mitigation Budget (₹)',
+  specDict = getHouseholdSpecDict('en'),
   onBudgetChange,
 }: HouseholdHomeSpecsProps): JSX.Element {
   const [budgetInput, setBudgetInput] = useState(String(budgetRupees));
@@ -22,7 +30,7 @@ export function HouseholdHomeSpecs({
     setBudgetInput(val);
     const parsed = Number(val);
     if (!val.trim() || isNaN(parsed) || parsed < 0 || parsed > 500000) {
-      setError('Budget must be an integer between 0 and 500000');
+      setError(specDict.budgetError);
     } else {
       setError(null);
       onBudgetChange(Math.floor(parsed));
@@ -36,31 +44,35 @@ export function HouseholdHomeSpecs({
       </h3>
       <div className="grid grid-cols-2 gap-4 text-xs">
         <div>
-          <span className="text-slate-700 dark:text-slate-300">Home Type</span>
-          <p className="mt-1 font-semibold capitalize text-slate-900 dark:text-slate-100">
-            {home.type}
-          </p>
-        </div>
-        <div>
-          <span className="text-slate-700 dark:text-slate-300">Floor Area</span>
-          <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
-            {home.floorAreaM2} m²
-          </p>
-        </div>
-        <div>
           <span className="text-slate-700 dark:text-slate-300">
-            Building Sealing
+            {specDict.homeTypeLabel}
           </span>
           <p className="mt-1 font-semibold capitalize text-slate-900 dark:text-slate-100">
-            {home.sealing}
+            {specDict.homeTypes[home.type]}
           </p>
         </div>
         <div>
           <span className="text-slate-700 dark:text-slate-300">
-            Cooking Fuel
+            {specDict.floorAreaLabel}
+          </span>
+          <p className="mt-1 font-semibold text-slate-900 dark:text-slate-100">
+            {home.floorAreaM2} {specDict.sqMetersUnit}
+          </p>
+        </div>
+        <div>
+          <span className="text-slate-700 dark:text-slate-300">
+            {specDict.sealingLabel}
+          </span>
+          <p className="mt-1 font-semibold capitalize text-slate-900 dark:text-slate-100">
+            {specDict.sealingTypes[home.sealing]}
+          </p>
+        </div>
+        <div>
+          <span className="text-slate-700 dark:text-slate-300">
+            {specDict.cookingFuelLabel}
           </span>
           <p className="mt-1 font-semibold uppercase text-slate-900 dark:text-slate-100">
-            {home.cookingFuel}
+            {specDict.fuels[home.cookingFuel]}
           </p>
         </div>
       </div>
@@ -69,7 +81,7 @@ export function HouseholdHomeSpecs({
           htmlFor="household-budget-input"
           className="block font-medium text-slate-700 dark:text-slate-300"
         >
-          Monthly Mitigation Budget (₹)
+          {budgetTitle}
         </label>
         <input
           id="household-budget-input"
