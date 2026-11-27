@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { getCityById } from '../config/cities';
 import type { HouseholdProfile } from '../domain/contracts';
 import { householdProfileSchema } from '../domain/profile/schemas';
 
@@ -29,7 +30,11 @@ export const persistedStateV1Schema = z.object({
     .array(z.string().min(1).max(80))
     .max(200) as unknown as z.ZodType<readonly string[]>,
   aiConsent: z.boolean(),
-  selectedCity: z.string().min(1).max(60),
+  selectedCity: z
+    .string()
+    .min(1)
+    .max(60)
+    .refine((c) => getCityById(c) !== undefined, 'Invalid city selection'),
   updatedAt: z.number().int().positive(),
 });
 

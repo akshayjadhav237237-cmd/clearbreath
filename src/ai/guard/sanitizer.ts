@@ -25,7 +25,7 @@ function stripControlCharacters(text: string): string {
     const isControl =
       (code >= 0 && code <= 31) ||
       (code >= 127 && code <= 159) ||
-      (code >= 8203 && code <= 8205) ||
+      code === 8203 ||
       code === 65279;
     if (!isControl) {
       result += text[i];

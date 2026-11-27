@@ -1,5 +1,7 @@
 import type { Clock, IdGenerator } from '../shared/ports';
 import type { DailyPlan } from '../domain/contracts';
+import type { Language } from '../shared/i18n';
+import { translatePlanAdvisory } from '../shared/i18n/catalog-hi';
 
 const CRLF = '\r\n';
 const MAX_OCTETS = 75;
@@ -99,16 +101,25 @@ function buildRoutineEvents(
   plan: DailyPlan,
   stamp: string,
   idGen: IdGenerator,
-  ymd: { year: number; month: number; day: number }
+  ymd: { year: number; month: number; day: number; lang: Language }
 ): string[] {
   const events: string[] = [];
+  const advisory = translatePlanAdvisory(plan.advisorySummary, ymd.lang);
   if (plan.bestVentilationWindow) {
+    const summary =
+      ymd.lang === 'hi'
+        ? 'क्लियरब्रेथ: कम प्रदूषण में वेंटिलेशन समय'
+        : 'Clearbreath: Optimal Ventilation Window';
+    const desc =
+      ymd.lang === 'hi'
+        ? `न्यूनतम परिवेशी एक्यूआई के दौरान खिड़कियां खोलें। परामर्श: ${advisory}`
+        : `Open cross-ventilation windows during lowest ambient AQI. Advisory: ${advisory}`;
     events.push(
       ...buildVEvent({
         uid: idGen.next(),
         stamp,
-        summary: 'Clearbreath: Optimal Ventilation Window',
-        desc: `Open cross-ventilation windows during lowest ambient AQI. Advisory: ${plan.advisorySummary}`,
+        summary,
+        desc,
         start: formatFloatingDateTime(
           ymd.year,
           ymd.month,
@@ -129,8 +140,14 @@ function buildRoutineEvents(
     ...buildVEvent({
       uid: idGen.next(),
       stamp,
-      summary: 'Clearbreath: Air Purifier Night Boost',
-      desc: 'Set air purifier to high speed before bedtime to clean bedroom air for vulnerable members.',
+      summary:
+        ymd.lang === 'hi'
+          ? 'क्लियरब्रेथ: एयर प्यूरीफायर रात्रि बूस्ट'
+          : 'Clearbreath: Air Purifier Night Boost',
+      desc:
+        ymd.lang === 'hi'
+          ? 'सोने से पहले संवेदनशील सदस्यों के कमरे की हवा साफ करने के लिए एयर प्यूरीफायर हाई स्पीड पर चलाएं।'
+          : 'Set air purifier to high speed before bedtime to clean bedroom air for vulnerable members.',
       start: formatFloatingDateTime(ymd.year, ymd.month, ymd.day, 21),
       end: formatFloatingDateTime(ymd.year, ymd.month, ymd.day, 23),
     })
@@ -142,7 +159,8 @@ function buildRoutineEvents(
 export function exportDailyPlanIcs(
   plan: DailyPlan,
   clock: Clock,
-  idGen: IdGenerator
+  idGen: IdGenerator,
+  language: Language = 'en'
 ): string {
   const stamp = formatUtcTimestamp(clock.now());
   const d = new Date(clock.now());
@@ -150,12 +168,13 @@ export function exportDailyPlanIcs(
     year: d.getFullYear(),
     month: d.getMonth() + 1,
     day: d.getDate(),
+    lang: language,
   };
 
   const lines: string[] = [
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
-    'PRODID:-//Clearbreath//Winter Smog Action Plan//EN',
+    `PRODID:-//Clearbreath//Winter Smog Action Plan//${language.toUpperCase()}`,
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     ...buildRoutineEvents(plan, stamp, idGen, ymd),

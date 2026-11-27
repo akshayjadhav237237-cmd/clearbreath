@@ -17,6 +17,45 @@ import {
   HI_SEVERITY_SUMMARIES,
 } from './local-text-hi';
 
+const HI_CITIES: Readonly<Record<string, string>> = {
+  Delhi: 'दिल्ली',
+  Gurugram: 'गुरुग्राम',
+  Noida: 'नोएडा',
+  Mumbai: 'मुंबई',
+  Pune: 'पुणे',
+  Kolkata: 'कोलकाता',
+  Lucknow: 'लखनऊ',
+  Patna: 'पटना',
+  Ahmedabad: 'अहमदाबाद',
+  Bengaluru: 'बेंगलुरु',
+  Chennai: 'चेन्नई',
+  Hyderabad: 'हैदराबाद',
+};
+
+const MEDICAL_KEYWORDS: readonly string[] = [
+  'fever',
+  'cough',
+  'chest pain',
+  'medicine',
+  'inhaler',
+  'बुखार',
+  'खांसी',
+  'खाँसी',
+  'सीने में दर्द',
+  'दवाई',
+  'इनहेलर',
+  'सांस',
+];
+
+function isMedicalQuery(question: string | null): boolean {
+  const q = (question ?? '').toLowerCase();
+  return MEDICAL_KEYWORDS.some((kw) => q.includes(kw));
+}
+
+function formatCityLabel(city: string, isHi: boolean): string {
+  return isHi ? (HI_CITIES[city] ?? city) : city;
+}
+
 /** Local deterministic AI provider generating explanations from verified facts without network calls. */
 export class LocalProvider implements AiProvider {
   readonly id = 'local' as const;
@@ -30,7 +69,7 @@ export class LocalProvider implements AiProvider {
     const cautions = isHi ? HI_CAUTION_NOTES : EN_CAUTION_NOTES;
 
     const baseSummary = summaries[ctx.aqiCategory] ?? summaries.moderate;
-    const summary = `${ctx.city}: ${baseSummary}`;
+    const summary = `${formatCityLabel(ctx.city, isHi)}: ${baseSummary}`;
     const caution = cautions[ctx.sensitivityLevel] ?? cautions.low ?? '';
 
     const actionFacts = ctx.facts
@@ -49,15 +88,7 @@ export class LocalProvider implements AiProvider {
     const isHi = ctx.language === 'hi';
     const defaults = isHi ? HI_DEFAULT_ANSWERS : EN_DEFAULT_ANSWERS;
 
-    const q = (ctx.question ?? '').toLowerCase();
-    const isMedical =
-      q.includes('fever') ||
-      q.includes('cough') ||
-      q.includes('chest pain') ||
-      q.includes('medicine') ||
-      q.includes('inhaler');
-
-    if (isMedical) {
+    if (isMedicalQuery(ctx.question)) {
       return ok({
         answer: defaults.medicalDisclaimer,
         usedActionIds: [],

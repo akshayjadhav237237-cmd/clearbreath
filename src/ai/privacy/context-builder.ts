@@ -3,6 +3,7 @@ import type {
   HouseholdProfile,
   SensitivityLevel,
 } from '../../domain/contracts';
+import { getCityById } from '../../config/cities';
 import type {
   BudgetBand,
   GroundingFact,
@@ -39,8 +40,10 @@ export function buildLlmSafeContext(
     new Set(profile.members.map((m) => m.ageGroup))
   ).sort();
 
+  const safeCity = getCityById(city)?.name ?? 'Selected City';
+
   return {
-    city,
+    city: safeCity,
     aqiCategory: aqi.category,
     aqiValue: aqi.value,
     sensitivityLevel,

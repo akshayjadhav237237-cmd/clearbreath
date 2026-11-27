@@ -7,6 +7,26 @@ import type {
 } from '../contracts';
 import { getActionById } from '../../domain/actions';
 
+const DEVANAGARI_DIGITS = '०१२३४५६७८९';
+
+/** Normalizes Devanagari digits to ASCII and strips pollutant/filter identifier numerals. */
+function normalizeTextForGrounding(text: string): string {
+  const asciiDigits = text.replace(/[०-९]/g, (ch) =>
+    String(DEVANAGARI_DIGITS.indexOf(ch))
+  );
+  return asciiDigits
+    .replace(/(?:\bPM|पीएम)\s*(?:2\.5|10)\b/gi, ' ')
+    .replace(/(?:\bN\s*95|एन\s*95|\bFFP\s*2|\bMERV[-\s]*13)\b/gi, ' ')
+    .replace(/\bCO2e?\b/gi, ' ')
+    .replace(/m[²³23]/gi, ' ');
+}
+
+function extractStandaloneNumbers(text: string): number[] {
+  const normalized = normalizeTextForGrounding(text);
+  const matches = normalized.match(/(?<![A-Za-z0-9])\d+(?:\.\d+)?/g);
+  return matches ? matches.map(Number) : [];
+}
+
 /** Extracts all numbers present in an array of grounding facts and their descriptive text. */
 function collectAllowedNumbers(facts: readonly GroundingFact[]): Set<number> {
   const allowed = new Set<number>([0, 1, 24]);
@@ -17,11 +37,8 @@ function collectAllowedNumbers(facts: readonly GroundingFact[]): Set<number> {
       allowed.add(Math.floor(f.value));
       allowed.add(Math.ceil(f.value));
     }
-    const matches = f.text.match(/\b\d+(?:\.\d+)?\b/g);
-    if (matches) {
-      for (const m of matches) {
-        allowed.add(Number(m));
-      }
+    for (const num of extractStandaloneNumbers(f.text)) {
+      allowed.add(num);
     }
   }
   return allowed;
@@ -29,10 +46,7 @@ function collectAllowedNumbers(facts: readonly GroundingFact[]): Set<number> {
 
 /** Validates that all numerals in a text string originate from the allowed facts set. */
 function validateNumeralsInText(text: string, allowed: Set<number>): boolean {
-  const matches = text.match(/\b\d+(?:\.\d+)?\b/g);
-  if (!matches) return true;
-  for (const m of matches) {
-    const num = Number(m);
+  for (const num of extractStandaloneNumbers(text)) {
     if (!allowed.has(num)) {
       return false;
     }
