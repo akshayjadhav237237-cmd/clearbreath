@@ -57,10 +57,12 @@ describe('Prompt sanitizer input validation and injection detection', () => {
   });
 });
 
+const SEAL_ACTION_ID = 'act-indoor-seal-gaps';
+
 describe('Grounding validator numerical and catalog checks', () => {
   const sampleFacts: readonly GroundingFact[] = [
     {
-      id: 'act-indoor-seal-gaps',
+      id: SEAL_ACTION_ID,
       kind: 'action',
       text: 'Seals window gaps to cut infiltration by 20%.',
       value: 20,
@@ -78,7 +80,7 @@ describe('Grounding validator numerical and catalog checks', () => {
       summary: 'Current ambient AQI is 430 in Delhi.',
       highlights: [
         {
-          actionId: 'act-indoor-seal-gaps',
+          actionId: SEAL_ACTION_ID,
           reason: 'Cuts infiltration by 20%.',
         },
       ],
@@ -115,5 +117,33 @@ describe('Grounding validator numerical and catalog checks', () => {
     if (isErr(res)) {
       expect(res.error.code).toBe('groundingViolation');
     }
+  });
+});
+
+describe('Hindi and technical identifier grounding', () => {
+  const sampleFacts: readonly GroundingFact[] = [
+    { id: SEAL_ACTION_ID, kind: 'action', text: 'Seals gaps 20%.', value: 20 },
+    { id: 'aqi-baseline', kind: 'aqi', text: 'AQI is 430.', value: 430 },
+  ];
+
+  it('preserves Devanagari ZWJ/ZWNJ, avoids PM2.5 false splits, and checks Hindi numerals', () => {
+    const zwjQuestion = 'क\u200Dया हवा \u200C साफ है?';
+    const sanitized = sanitizeUserQuestion(zwjQuestion);
+    expect(isOk(sanitized)).toBe(true);
+    if (isOk(sanitized)) expect(sanitized.value).toBe(zwjQuestion);
+
+    const pmAnswer: AiAnswer = {
+      answer: 'PM2.5 is high at AQI 430; एन95 and पीएम 2.5 advise 20% seal.',
+      usedActionIds: [SEAL_ACTION_ID],
+      refusal: false,
+    };
+    expect(isOk(validateAnswerGrounding(pmAnswer, sampleFacts))).toBe(true);
+
+    const devBad: AiAnswer = {
+      answer: 'एक्यूआई ९९९ है।',
+      usedActionIds: [],
+      refusal: false,
+    };
+    expect(isErr(validateAnswerGrounding(devBad, sampleFacts))).toBe(true);
   });
 });

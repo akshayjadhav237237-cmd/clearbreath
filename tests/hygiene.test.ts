@@ -1,6 +1,20 @@
 import { describe, it, expect } from 'vitest';
 import * as fs from 'node:fs';
 import * as path from 'node:path';
+import { EN_TRANSLATIONS } from '../src/shared/i18n/en';
+
+function collectLeafPaths(obj: Record<string, unknown>, prefix = ''): string[] {
+  const paths: string[] = [];
+  for (const [k, v] of Object.entries(obj)) {
+    const next = prefix ? `${prefix}.${k}` : k;
+    if (v && typeof v === 'object') {
+      paths.push(...collectLeafPaths(v as Record<string, unknown>, next));
+    } else {
+      paths.push(next);
+    }
+  }
+  return paths;
+}
 
 /** Recursively gathers all file paths under a directory. */
 function getFilesRecursively(dir: string): string[] {
@@ -71,5 +85,42 @@ describe('Codebase hygiene', () => {
         `File ${path.relative(root, file)} exceeds 200 lines (${lines.length})`
       ).toBeLessThanOrEqual(200);
     }
+  });
+});
+
+describe('Translation dictionary usage', () => {
+  it('references every leaf dictionary key in src', () => {
+    const root = process.cwd();
+    const srcFiles = getFilesRecursively(path.join(root, 'src'));
+    const dictSkip = new Set([
+      'src/shared/i18n/en.ts',
+      'src/shared/i18n/hi.ts',
+      'src/shared/i18n/types.ts',
+    ]);
+    const codeBlob = srcFiles
+      .filter((f) => !dictSkip.has(path.relative(root, f).replace(/\\/g, '/')))
+      .map((f) => fs.readFileSync(f, 'utf-8'))
+      .join('\n');
+    const leaves = collectLeafPaths(
+      EN_TRANSLATIONS as unknown as Record<string, unknown>
+    );
+    const dynamicGroups = ['nav.', 'severity.', 'confidenceTiers.'];
+    const unused = leaves.filter((leaf) => {
+      if (dynamicGroups.some((g) => leaf.includes(g))) return false;
+      const parts = leaf.split('.');
+      const short =
+        parts.length >= 2
+          ? `${parts[parts.length - 2]}.${parts[parts.length - 1]}`
+          : leaf;
+      if (
+        leaf === 'common.low' ||
+        leaf === 'common.medium' ||
+        leaf === 'common.high'
+      ) {
+        return !codeBlob.includes('common[level]');
+      }
+      return !codeBlob.includes(short) && !codeBlob.includes(`t.${leaf}`);
+    });
+    expect(unused).toEqual([]);
   });
 });

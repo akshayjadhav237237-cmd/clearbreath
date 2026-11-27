@@ -29,4 +29,14 @@ describe('HouseholdPanel', () => {
     fireEvent.click(seniorBtn);
     expect(useAppStore.getState().activePreset).toBe('mumbaiSenior');
   });
+
+  it('localizes member badges, housing specs, and budget error in Hindi', () => {
+    useAppStore.setState({ language: 'hi' });
+    render(<HouseholdPanel />);
+    expect(screen.getByText('संवेदनशीलता:')).toBeDefined();
+    expect(screen.getByText('आवास प्रकार')).toBeDefined();
+    expect(screen.getByText('मासिक प्रदूषण नियंत्रण बजट (₹)')).toBeDefined();
+    expect(screen.getByText(/वर्ग मी\./)).toBeDefined();
+    useAppStore.setState({ language: 'en' });
+  });
 });

@@ -118,9 +118,14 @@ describe('persistence adapter and storage sync edge cases', () => {
     const badV0 = makeStorage({
       [PERSISTENCE_STORAGE_KEY]: JSON.stringify({ version: 0, bad: true }),
     });
+    useAppStore.setState({ language: 'en' });
     const stopBad = initStorageSync(badV0);
     expect(useAppStore.getState().toastMessage).toContain('reset to default');
     stopBad();
+    useAppStore.setState({ language: 'hi' });
+    const stopHiBad = initStorageSync(badV0);
+    expect(useAppStore.getState().toastMessage).toContain('रीसेट');
+    stopHiBad();
   });
 });
 

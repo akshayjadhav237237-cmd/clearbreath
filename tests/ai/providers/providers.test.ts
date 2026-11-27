@@ -82,10 +82,10 @@ describe('LocalProvider deterministic explanations and answers', () => {
     }
     const hi = await provider.explainPlan({ ...CTX, language: 'hi' });
     expect(isOk(hi)).toBe(true);
-    if (isOk(hi)) expect(hi.value.summary).toContain('Delhi');
+    if (isOk(hi)) expect(hi.value.summary).toContain('दिल्ली');
   });
 
-  it('provides a medical disclaimer when symptoms are mentioned', async () => {
+  it('provides a medical disclaimer when English or Hindi symptoms are mentioned', async () => {
     const res = await new LocalProvider().answer({
       ...CTX,
       question: 'I have severe cough and fever, what medicine should I take?',
@@ -95,6 +95,13 @@ describe('LocalProvider deterministic explanations and answers', () => {
       expect(res.value.answer.toLowerCase()).toContain('medical');
       expect(res.value.usedActionIds).toHaveLength(0);
     }
+    const hiMed = await new LocalProvider().answer({
+      ...CTX,
+      language: 'hi',
+      question: 'मुझे बुखार और खांसी है, कौन सी दवाई लें?',
+    });
+    expect(isOk(hiMed)).toBe(true);
+    if (isOk(hiMed)) expect(hiMed.value.answer).toContain('चिकित्सक');
   });
 });
 

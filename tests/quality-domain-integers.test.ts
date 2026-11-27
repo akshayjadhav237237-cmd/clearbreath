@@ -4,7 +4,19 @@ import {
   calculateInhaledDose,
   calculateIndoorPm25,
 } from '../src/domain/exposure';
-import { ACTION_CATALOG } from '../src/domain/actions';
+import {
+  ACTION_CATALOG,
+  calculateModalShiftSavingsGrams,
+} from '../src/domain/actions';
+import {
+  generateDailyPlan,
+  interpolateHourlySeries,
+} from '../src/domain/planner';
+import {
+  generateRecommendations,
+  summarizeScenario,
+} from '../src/domain/recommend';
+import { DEFAULT_HOUSEHOLD_PERSONA } from '../src/config/persona';
 import type { HomeProfile } from '../src/domain/contracts';
 
 describe('Quality Contract: Integer Domain Outputs (AQI & Dose)', () => {
@@ -60,5 +72,60 @@ describe('Quality Contract: Integer Domain Outputs (Indoor & Actions)', () => {
       expect(Number.isInteger(action.costRupees)).toBe(true);
       expect([1, 2, 3].includes(action.effort)).toBe(true);
     }
+  });
+});
+
+describe('Quality Contract: Planner, Scenario & Recommender Integers', () => {
+  const unpurifiedHome: HomeProfile = {
+    type: 'apartment',
+    floorAreaM2: 90,
+    ceilingHeightCm: 300,
+    sealing: 'average',
+    purifierCadrM3h: null,
+    hasKitchenExhaust: true,
+    cookingFuel: 'png',
+  };
+
+  it('guarantees integer outputs across planner, recommendations, scenario, and unpurified home', () => {
+    const unpurified = calculateIndoorPm25(215.7, unpurifiedHome, false);
+    expect(unpurified.ok && Number.isInteger(unpurified.value)).toBe(true);
+
+    const interp = interpolateHourlySeries([
+      { hour: 2, pm25: 145.6, pm10: 210.4 },
+      { hour: 14, pm25: 80.2, pm10: 130.8 },
+    ]);
+    expect(interp.ok).toBe(true);
+    if (!interp.ok) return;
+    for (const r of interp.value) {
+      expect(Number.isInteger(r.pm25) && Number.isInteger(r.pm10)).toBe(true);
+    }
+
+    const plan = generateDailyPlan(
+      interp.value,
+      'high',
+      DEFAULT_HOUSEHOLD_PERSONA.lifestyle
+    );
+    expect(plan.ok).toBe(true);
+    if (!plan.ok) return;
+    const aqi = {
+      value: 215,
+      category: 'poor' as const,
+      dominant: 'pm25' as const,
+    };
+    const recs = generateRecommendations(
+      DEFAULT_HOUSEHOLD_PERSONA,
+      aqi,
+      plan.value,
+      ACTION_CATALOG
+    );
+    expect(recs.ok).toBe(true);
+    const summary = summarizeScenario(DEFAULT_HOUSEHOLD_PERSONA, aqi, [
+      'act-indoor-seal-gaps',
+    ]);
+    expect(Number.isInteger(summary.baselineDoseUg)).toBe(true);
+    expect(Number.isInteger(summary.mitigatedDoseUg)).toBe(true);
+    expect(
+      Number.isInteger(calculateModalShiftSavingsGrams('car', 'metro', 12.4))
+    ).toBe(true);
   });
 });

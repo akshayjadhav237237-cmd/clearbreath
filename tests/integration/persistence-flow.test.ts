@@ -49,22 +49,30 @@ describe('End-to-end storage persistence and recovery integration', () => {
     const storage = createMockStorage();
     const cleanup = initStorageSync(storage);
 
-    useAppStore.getState().setSelectedCity('Faridabad');
+    useAppStore.getState().setSelectedCity('Noida');
     useAppStore.getState().setAiConsent(true);
     useAppStore.getState().toggleActionCompleted('action-wet-mop');
 
     expect(storage.setItem).toHaveBeenCalledWith(
       PERSISTENCE_STORAGE_KEY,
-      expect.stringContaining('Faridabad')
+      expect.stringContaining('Noida')
     );
 
     const loaded = loadPersistedState(storage);
     expect(loaded.ok).toBe(true);
     if (loaded.ok) {
-      expect(loaded.value.selectedCity).toBe('Faridabad');
+      expect(loaded.value.selectedCity).toBe('Noida');
       expect(loaded.value.aiConsent).toBe(true);
       expect(loaded.value.completedActionIds).toContain('action-wet-mop');
     }
+
+    const tampered = createMockStorage({
+      [PERSISTENCE_STORAGE_KEY]: JSON.stringify({
+        ...(loaded.ok ? loaded.value : {}),
+        selectedCity: 'Faridabad',
+      }),
+    });
+    expect(loadPersistedState(tampered).ok).toBe(false);
 
     cleanup();
   });
