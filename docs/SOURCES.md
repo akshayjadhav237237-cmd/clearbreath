@@ -28,6 +28,6 @@ This document lists the scientific literature, regulatory standards, and externa
 
 ## Notes on Reference Scope
 
-- External citation URLs were re-verified on `2026-11-27` and are not fetched automatically during build or verification runs. Note that `ashrae-62-2-residential` returns HTTP 403 Cloudflare bot challenge to non-browser clients (US DOE PNNL BASC mirror: `https://basc.pnnl.gov/library/standard-622-2022-ventilation-and-acceptable-indoor-air-quality-residential-buildings` returns HTTP 200).
+- External citation URLs were re-verified on `2026-11-27` and are not fetched automatically during build or verification runs. Note that `ashrae-62-2-residential` returns HTTP 403 Cloudflare bot challenge to non-browser clients (US DOE PNNL BASC mirror: `https://basc.pnnl.gov/library/standard-622-2022-ventilation-and-acceptable-indoor-air-quality-residential-buildings` returns HTTP 200), while Elsevier DOI URLs (`thatcher-deposition-pm25`, `lancet-planetary-health-india`) resolve `302 -> 200` via `linkinghub.elsevier.com` (before ScienceDirect's Cloudflare gate) and `200 OK` via CrossRef API.
 - `google-gemini-api` aligns with `GEMINI_MODEL_ID = 'gemini-3.8-flash'` (`src/config/constants.ts`); live API execution against Google's Gemini endpoint remains unverified without a live API key.
 - Synthetic diurnal scaling arrays in `src/ai/airdata/manual-provider.ts` (`DIURNAL_COEFFICIENTS`) and `src/ai/airdata/sample-provider.ts` (`WINTER_DIURNAL_FACTORS`) are internal deterministic fixtures used for scenario demos and tests rather than external published curves.
