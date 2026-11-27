@@ -8,6 +8,13 @@ import importX from 'eslint-plugin-import-x';
 
 const PATTERN_FEATURES = '**/features/**';
 const PATTERN_APP = '**/app/**';
+const UI_FORBIDDEN = [
+  PATTERN_FEATURES,
+  PATTERN_APP,
+  'react',
+  'react-dom',
+  'zustand',
+];
 
 export default tseslint.config(
   {
@@ -105,14 +112,7 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: [
-                'react',
-                'react-dom',
-                'zustand',
-                PATTERN_FEATURES,
-                '**/ai/**',
-                PATTERN_APP,
-              ],
+              group: ['**/ai/**', ...UI_FORBIDDEN],
               message: 'Domain layer cannot import UI or framework modules',
             },
             {
@@ -142,6 +142,7 @@ export default tseslint.config(
   },
   {
     files: ['src/shared/**/*'],
+    ignores: ['src/shared/state/**/*'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -150,11 +151,27 @@ export default tseslint.config(
             {
               group: [
                 '**/domain/**',
-                PATTERN_FEATURES,
                 '**/ai/**',
+                PATTERN_FEATURES,
                 PATTERN_APP,
               ],
               message: 'Shared layer cannot import higher layers',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/shared/state/**/*'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['**/ai/**', ...UI_FORBIDDEN],
+              message: 'Shared state selectors cannot import UI or AI layers',
             },
           ],
         },
@@ -169,13 +186,7 @@ export default tseslint.config(
         {
           patterns: [
             {
-              group: [
-                PATTERN_FEATURES,
-                PATTERN_APP,
-                'react',
-                'react-dom',
-                'zustand',
-              ],
+              group: UI_FORBIDDEN,
               message: 'AI layer imports domain and config only',
             },
           ],

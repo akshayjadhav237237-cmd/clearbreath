@@ -4,7 +4,6 @@ export type Language = 'en' | 'hi';
 /** Application localization dictionary structure contract. */
 export interface AppTranslations {
   readonly appName: string;
-  readonly tagline: string;
   readonly nav: {
     readonly airNow: string;
     readonly household: string;
@@ -23,19 +22,21 @@ export interface AppTranslations {
     readonly severe: string;
   };
   readonly common: {
-    readonly done: string;
-    readonly active: string;
-    readonly save: string;
-    readonly reset: string;
-    readonly cost: string;
-    readonly effort: string;
-    readonly rupees: string;
     readonly ugm3: string;
-    readonly source: string;
+    readonly estimateNote: string;
     readonly low: string;
     readonly medium: string;
     readonly high: string;
-    readonly estimateNote: string;
+    readonly confidencePrefix: string;
+    readonly confidenceTiers: {
+      readonly low: string;
+      readonly medium: string;
+      readonly high: string;
+    };
+    readonly closeDialog: string;
+    readonly dismissToast: string;
+    readonly errorTitle: string;
+    readonly errorDesc: string;
   };
   readonly household: {
     readonly title: string;
@@ -45,10 +46,8 @@ export interface AppTranslations {
     readonly puneStudent: string;
     readonly mumbaiSenior: string;
     readonly membersTitle: string;
-    readonly addMember: string;
     readonly homeTitle: string;
     readonly budgetTitle: string;
-    readonly commuteTitle: string;
   };
   readonly airNow: {
     readonly title: string;
@@ -56,7 +55,6 @@ export interface AppTranslations {
     readonly pm25: string;
     readonly pm10: string;
     readonly dominant: string;
-    readonly attribution: string;
     readonly liveBadge: string;
     readonly sampleBadge: string;
   };
@@ -67,21 +65,10 @@ export interface AppTranslations {
     readonly ventilation: string;
     readonly peakSmogWarning: string;
   };
-  readonly actions: {
-    readonly title: string;
-    readonly filterAll: string;
-    readonly doneToday: string;
-    readonly avoidedDose: string;
-    readonly avoidedCo2: string;
-    readonly markDone: string;
-  };
   readonly compare: {
     readonly title: string;
     readonly baseline: string;
     readonly mitigated: string;
-    readonly doseReduction: string;
-    readonly costSummary: string;
-    readonly emissionsSaved: string;
   };
   readonly assistant: {
     readonly title: string;
@@ -89,10 +76,8 @@ export interface AppTranslations {
     readonly placeholder: string;
     readonly send: string;
     readonly consentToggle: string;
-    readonly consentNote: string;
     readonly modeLocal: string;
     readonly modeGemini: string;
-    readonly showFacts: string;
   };
   readonly community: {
     readonly title: string;

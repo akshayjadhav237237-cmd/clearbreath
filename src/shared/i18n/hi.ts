@@ -3,7 +3,6 @@ import type { AppTranslations } from './types';
 /** Hindi translations dictionary for user interface copy. */
 export const HI_TRANSLATIONS: AppTranslations = {
   appName: 'क्लियरब्रेथ',
-  tagline: 'पारिवारिक वायु गुणवत्ता एवं शीतकालीन स्मॉग परामर्शदाता',
   nav: {
     airNow: 'वर्तमान वायु',
     household: 'परिवार प्रोफाइल',
@@ -22,20 +21,22 @@ export const HI_TRANSLATIONS: AppTranslations = {
     severe: 'गंभीर',
   },
   common: {
-    done: 'सम्पन्न',
-    active: 'सक्रिय',
-    save: 'सहेजें',
-    reset: 'डिफ़ॉल्ट पर रीसेट करें',
-    cost: 'लागत',
-    effort: 'प्रयास',
-    rupees: '₹',
-    ugm3: 'µg/m³',
-    source: 'प्रमाणित स्रोत',
+    ugm3: 'माइक्रोग्राम/मी³',
+    estimateNote:
+      'निर्दिष्ट मान्यताओं के अंतर्गत मॉडल किया गया अनुमान; वास्तविक जोखिम वेंटिलेशन और उत्सर्जन स्रोतों के अनुसार बदल सकता है।',
     low: 'कम',
     medium: 'मध्यम',
     high: 'उच्च',
-    estimateNote:
-      'निर्दिष्ट मान्यताओं के अंतर्गत मॉडल किया गया अनुमान; वास्तविक जोखिम वेंटिलेशन और उत्सर्जन स्रोतों के अनुसार बदल सकता है।',
+    confidencePrefix: 'विश्वसनीयता:',
+    confidenceTiers: {
+      low: 'कम अनुभवजन्य विश्वास',
+      medium: 'मध्यम अनुभवजन्य विश्वास',
+      high: 'उच्च वैज्ञानिक सहमति',
+    },
+    closeDialog: 'डायलाग बंद करें',
+    dismissToast: 'सूचना बंद करें',
+    errorTitle: 'कुछ गड़बड़ हो गई',
+    errorDesc: 'यह दृश्य दिखाने में असमर्थ। कृपया पृष्ठ रीफ़्रेश करें।',
   },
   household: {
     title: 'परिवार एवं आवास विवरण',
@@ -45,10 +46,8 @@ export const HI_TRANSLATIONS: AppTranslations = {
     puneStudent: 'पुणे छात्र (एकल)',
     mumbaiSenior: 'मुंबई वरिष्ठ नागरिक दंपति',
     membersTitle: 'परिवार के सदस्य',
-    addMember: 'सदस्य जोड़ें',
     homeTitle: 'घर का प्रकार एवं सीलिंग',
-    budgetTitle: 'मासिक प्रदूषण नियंत्रण बजट',
-    commuteTitle: 'दैनिक यात्रा का साधन',
+    budgetTitle: 'मासिक प्रदूषण नियंत्रण बजट (₹)',
   },
   airNow: {
     title: 'परिवेशी वायु गुणवत्ता सूचकांक',
@@ -56,7 +55,6 @@ export const HI_TRANSLATIONS: AppTranslations = {
     pm25: 'पीएम 2.5 (सूक्ष्म कण)',
     pm10: 'पीएम 10 (श्वसनीय कण)',
     dominant: 'मुख्य प्रदूषक',
-    attribution: 'ओपन-मेटियो (CC BY 4.0) द्वारा संचालित वायु डेटा',
     liveBadge: 'लाइव डेटा',
     sampleBadge: 'सिम्युलेटेड डेटा',
   },
@@ -68,21 +66,10 @@ export const HI_TRANSLATIONS: AppTranslations = {
     peakSmogWarning:
       'अत्यधिक स्मॉग का समय: खिड़कियां बंद रखें और प्यूरीफायर चलाएं।',
   },
-  actions: {
-    title: 'प्रदूषण रोकथाम उपाय',
-    filterAll: 'हर श्रेणी',
-    doneToday: 'आज पूर्ण किए गए उपाय',
-    avoidedDose: 'बचाव की गई दैनिक सांस खुराक',
-    avoidedCo2: 'रोकी गई कार्बन उत्सर्जन मात्रा',
-    markDone: 'लागू किया गया चिह्नित करें',
-  },
   compare: {
     title: 'प्रदूषण रोकथाम प्रभाव तुलना',
     baseline: 'बिना किसी उपाय के (वर्तमान स्थिति)',
     mitigated: 'योजनाबद्ध उपायों के साथ',
-    doseReduction: 'कुल सांस खुराक में कमी',
-    costSummary: 'कुल कार्यान्वयन लागत',
-    emissionsSaved: 'बचाया गया सामुदायिक कार्बन',
   },
   assistant: {
     title: 'एआई वायु गुणवत्ता सहायक',
@@ -91,11 +78,8 @@ export const HI_TRANSLATIONS: AppTranslations = {
     placeholder: 'वायु गुणवत्ता, फिल्टर या यात्रा सुरक्षा के बारे में पूछें...',
     send: 'पूछें',
     consentToggle: 'क्लाउड जेमिनी 3.8 फ्लैश सक्षम करें (केवल अनुमत फ़ील्ड)',
-    consentNote:
-      'वैकल्पिक। डोमेन मॉडल ब्राउज़र में चलते हैं; लोड पर चुने गए शहर के निर्देशांक Open-Meteo को और सहमति व कुंजी होने पर केवल अनुमत फ़ील्ड जेमिनी को भेजे जाते हैं।',
     modeLocal: 'स्थानीय टेम्पलेट इंजन',
     modeGemini: 'जेमिनी 3.8 फ्लैश (सत्यापित)',
-    showFacts: 'एआई को भेजे गए सत्यापित तथ्य देखें',
   },
   community: {
     title: 'पड़ोस एवं आरडब्ल्यूए संदेश कार्ड',

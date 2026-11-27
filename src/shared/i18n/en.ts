@@ -3,7 +3,6 @@ import type { AppTranslations } from './types';
 /** English translations dictionary for user interface copy. */
 export const EN_TRANSLATIONS: AppTranslations = {
   appName: 'Clearbreath',
-  tagline: 'Family Air Quality & Winter Smog Advisory',
   nav: {
     airNow: 'Air Now',
     household: 'Household',
@@ -22,20 +21,22 @@ export const EN_TRANSLATIONS: AppTranslations = {
     severe: 'Severe',
   },
   common: {
-    done: 'Done',
-    active: 'Active',
-    save: 'Save Changes',
-    reset: 'Reset to Default',
-    cost: 'Cost',
-    effort: 'Effort',
-    rupees: '₹',
     ugm3: 'µg/m³',
-    source: 'Verified Source',
+    estimateNote:
+      'Modelled estimate under stated assumptions; actual exposure varies with real-world ventilation and emission sources.',
     low: 'Low',
     medium: 'Medium',
     high: 'High',
-    estimateNote:
-      'Modelled estimate under stated assumptions; actual exposure varies with real-world ventilation and emission sources.',
+    confidencePrefix: 'Confidence:',
+    confidenceTiers: {
+      low: 'Low empirical confidence',
+      medium: 'Moderate empirical confidence',
+      high: 'High scientific consensus',
+    },
+    closeDialog: 'Close dialog',
+    dismissToast: 'Dismiss notification',
+    errorTitle: 'Something went wrong',
+    errorDesc: 'Unable to display this view. Please try refreshing the page.',
   },
   household: {
     title: 'Household Profile',
@@ -45,10 +46,8 @@ export const EN_TRANSLATIONS: AppTranslations = {
     puneStudent: 'Pune Student (Single)',
     mumbaiSenior: 'Mumbai Senior Couple',
     membersTitle: 'Family Members',
-    addMember: 'Add Member',
     homeTitle: 'Home Envelope',
-    budgetTitle: 'Monthly Smog Mitigation Budget',
-    commuteTitle: 'Daily Commute Mode',
+    budgetTitle: 'Monthly Mitigation Budget (₹)',
   },
   airNow: {
     title: 'Ambient Air Quality',
@@ -56,7 +55,6 @@ export const EN_TRANSLATIONS: AppTranslations = {
     pm25: 'PM2.5 (Fine Particles)',
     pm10: 'PM10 (Inhalable Particles)',
     dominant: 'Dominant Pollutant',
-    attribution: 'Data powered by Open-Meteo under CC BY 4.0',
     liveBadge: 'Live API',
     sampleBadge: 'Simulated Data',
   },
@@ -68,21 +66,10 @@ export const EN_TRANSLATIONS: AppTranslations = {
     peakSmogWarning:
       'Severe Smog Hours: Keep windows sealed and operate purifiers.',
   },
-  actions: {
-    title: 'Mitigation Actions',
-    filterAll: 'Every Category',
-    doneToday: 'Completed Today',
-    avoidedDose: 'Daily Avoided Inhaled Dose',
-    avoidedCo2: 'Carbon Emissions Prevented',
-    markDone: 'Mark as Implemented',
-  },
   compare: {
     title: 'Mitigation Impact Comparison',
     baseline: 'Status Quo (No Action)',
     mitigated: 'With Planned Mitigations',
-    doseReduction: 'Total Inhaled Dose Reduction',
-    costSummary: 'Total Implementation Cost',
-    emissionsSaved: 'Community Carbon Saved',
   },
   assistant: {
     title: 'AI Air Quality Assistant',
@@ -91,11 +78,8 @@ export const EN_TRANSLATIONS: AppTranslations = {
     placeholder: 'Ask about air quality, filters, or commute safety...',
     send: 'Ask',
     consentToggle: 'Enable Cloud Gemini 3.8 Flash (Allowlist Egress)',
-    consentNote:
-      'Optional. Domain engines run in the browser; Open-Meteo receives the selected city coordinates on load, and Gemini receives allowlisted fields only with consent and an API key.',
     modeLocal: 'Local Template Engine',
     modeGemini: 'Gemini 3.8 Flash (Grounded)',
-    showFacts: 'Inspect Grounding Facts Passed to AI',
   },
   community: {
     title: 'Neighborhood Broadcast Card',
