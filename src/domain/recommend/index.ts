@@ -11,7 +11,11 @@ export {
   isSealingEligible,
 } from './eligibility';
 
-export { aqiToPm25 } from './quantification';
+export {
+  aqiToPm25,
+  calculateActionDoseReduction,
+  calculateHouseholdBaselineDose,
+} from './quantification';
 
 export {
   calculateImpactEfficiency,
@@ -21,3 +25,6 @@ export {
 export { compareChoices } from './compare';
 
 export { generateRecommendations } from './engine';
+
+export type { ScenarioSummary } from './scenario';
+export { summarizeScenario } from './scenario';

@@ -8,19 +8,34 @@ import { calculateIndoorPm25, calculateInhaledDose } from '../exposure';
 import { toInteger } from '../units';
 import { MINUTES_PER_DAY } from './constants';
 
-interface ExposureContext {
+/** Resolved indoor concentration and daily activity duration profile. */
+export interface HouseholdExposureContext {
   readonly indoorPm25: number;
   readonly outdoorMins: number;
   readonly commuteMins: number;
   readonly indoorMins: number;
 }
 
+/** Input parameters for computing household inhaled PM2.5 dose. */
+export interface HouseholdDoseInput {
+  readonly indoorPm25: number;
+  readonly outdoorPm25: number;
+  readonly indoorMins: number;
+  readonly outdoorMins: number;
+  readonly maskFitBps: number;
+}
+
 /** Resolves indoor concentrations and daily minute distributions for exposure modeling. */
-function resolveExposureContext(
+export function resolveExposureContext(
   profile: HouseholdProfile,
   outdoorPm25: number
-): ExposureContext {
-  const indoorRes = calculateIndoorPm25(outdoorPm25, profile.home, false);
+): HouseholdExposureContext {
+  const purifierActive = profile.home.purifierCadrM3h !== null;
+  const indoorRes = calculateIndoorPm25(
+    outdoorPm25,
+    profile.home,
+    purifierActive
+  );
   const indoorPm25 = indoorRes.ok
     ? indoorRes.value
     : toInteger(outdoorPm25 * 0.7);
@@ -30,29 +45,43 @@ function resolveExposureContext(
   return { indoorPm25, outdoorMins, commuteMins, indoorMins };
 }
 
+/** Computes total daily inhaled dose in integer ug across household members. */
+export function calculateHouseholdDose(
+  profile: HouseholdProfile,
+  input: HouseholdDoseInput
+): number {
+  let totalDose = 0;
+  for (const member of profile.members) {
+    const inDose = calculateInhaledDose(
+      input.indoorPm25,
+      input.indoorMins,
+      member.ageGroup
+    );
+    const outDose = calculateInhaledDose(
+      input.outdoorPm25,
+      input.outdoorMins,
+      member.ageGroup,
+      input.maskFitBps
+    );
+    if (inDose.ok) totalDose += inDose.value;
+    if (outDose.ok) totalDose += outDose.value;
+  }
+  return toInteger(totalDose);
+}
+
 /** Computes estimated baseline daily inhaled dose in integer ug across household members. */
 export function calculateHouseholdBaselineDose(
   profile: HouseholdProfile,
   outdoorPm25: number
 ): number {
   const ctx = resolveExposureContext(profile, outdoorPm25);
-
-  let totalDose = 0;
-  for (const member of profile.members) {
-    const inDose = calculateInhaledDose(
-      ctx.indoorPm25,
-      ctx.indoorMins,
-      member.ageGroup
-    );
-    const outDose = calculateInhaledDose(
-      outdoorPm25,
-      ctx.outdoorMins + ctx.commuteMins,
-      member.ageGroup
-    );
-    if (inDose.ok) totalDose += inDose.value;
-    if (outDose.ok) totalDose += outDose.value;
-  }
-  return toInteger(totalDose);
+  return calculateHouseholdDose(profile, {
+    indoorPm25: ctx.indoorPm25,
+    outdoorPm25,
+    indoorMins: ctx.indoorMins,
+    outdoorMins: ctx.outdoorMins + ctx.commuteMins,
+    maskFitBps: 0,
+  });
 }
 
 /** Calculates dose reduction across household members for indoor PM2.5 reduction effects. */

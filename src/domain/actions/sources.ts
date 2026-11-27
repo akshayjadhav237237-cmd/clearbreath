@@ -19,16 +19,22 @@ export const SOURCE_EMISSIONS_INVENTORY = 'cpcb-emissions-inventory';
 /** Curated registry of verified empirical evidence sources. */
 export const ACTION_SOURCES: readonly ActionSource[] = [
   {
+    id: SOURCE_ARAI,
+    title: 'CPCB & ARAI Emission Factor Development for Indian Vehicles',
+    organization: 'Central Pollution Control Board & ARAI',
+    url: 'https://cpcb.gov.in/source-apportioment-studies/Emission_Factors_Vehicles.pdf',
+  },
+  {
     id: SOURCE_EMISSIONS_INVENTORY,
     title: 'CPCB Comprehensive Emissions Inventory for Delhi-NCR',
     organization: 'Central Pollution Control Board',
-    url: 'https://cpcb.nic.in/source-apportionment-studies/',
+    url: 'https://cpcb.gov.in/source-apportionment-studies/',
   },
   {
     id: SOURCE_DMRC,
     title: 'Delhi Metro Rail Corporation Sustainability Report 2023',
     organization: 'Delhi Metro Rail Corporation',
-    url: 'https://www.delhimetrorail.com/corporate-sustainability',
+    url: 'https://delhimetrorail.com/otherdocuments/Sustainability-Report.pdf',
   },
   {
     id: SOURCE_WHO,
@@ -38,9 +44,9 @@ export const ACTION_SOURCES: readonly ActionSource[] = [
   },
   {
     id: SOURCE_SAMEER,
-    title: 'CPCB Sameer App & Air Quality Advisories',
+    title: 'CPCB Air Quality Management Portals & Advisories',
     organization: 'Central Pollution Control Board',
-    url: 'https://cpcb.nic.in/air-quality-guidelines/',
+    url: 'https://cpcb.gov.in/air-quality-management-portals/',
   },
   {
     id: SOURCE_EPA_CLEANERS,
@@ -52,20 +58,20 @@ export const ACTION_SOURCES: readonly ActionSource[] = [
     id: SOURCE_IITK,
     title: 'IIT Kanpur Comprehensive Study on Air Pollution in Delhi',
     organization: 'Indian Institute of Technology Kanpur',
-    url: 'https://cpcb.nic.in/delhi-air-pollution-study-iitk/',
+    url: 'https://environment.delhi.gov.in/sites/default/files/environment/generic_multiple_files/final_report09jan2016_1.pdf',
   },
   {
     id: SOURCE_NIOSH,
-    title: 'NIOSH Guide to the Selection and Use of Particulate Respirators',
+    title: 'NIOSH Respirator Types and Use Guidance',
     organization: 'CDC NIOSH',
-    url: 'https://www.cdc.gov/niosh/npptl/topics/respirators/disp_part/default.html',
+    url: 'https://www.cdc.gov/niosh/ppe/respirators/',
   },
   {
     id: SOURCE_LANCET,
     title:
       'Lancet Planetary Health: Health and Economic Impact of Air Pollution in India',
     organization: 'The Lancet Planetary Health',
-    url: 'https://www.thelancet.com/journals/lanplh',
+    url: 'https://doi.org/10.1016/S2542-5196(20)30298-9',
   },
 ];
 

@@ -20,7 +20,7 @@ export const CPCB_SOURCE_METADATA = {
   title: 'National Air Quality Index',
   organization: 'Central Pollution Control Board',
   year: 2014,
-  url: 'https://cpcb.nic.in/National-Air-Quality-Index/',
+  url: 'https://cpcb.gov.in/National-Air-Quality-Index/',
 } as const;
 
 /** CPCB 24-hour average PM2.5 breakpoints in micrograms per cubic meter. */

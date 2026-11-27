@@ -52,7 +52,8 @@ function evaluateActionDose(
   outdoorPm25: number,
   home: HomeProfile
 ): number {
-  const indoorRes = calculateIndoorPm25(outdoorPm25, home, false);
+  const purifierActive = home.purifierCadrM3h !== null;
+  const indoorRes = calculateIndoorPm25(outdoorPm25, home, purifierActive);
   const indoorPm25 = indoorRes.ok
     ? indoorRes.value
     : toInteger(outdoorPm25 * 0.7);

@@ -26,12 +26,12 @@ export const RECOMMENDATION_SOURCES: Readonly<
     id: 'dmrc-sustainability-2022',
     title:
       'Delhi Metro Rail Corporation Annual Sustainability and Carbon Emission Report',
-    url: 'https://www.delhimetrorail.com/corporate-sustainability',
+    url: 'https://delhimetrorail.com/otherdocuments/Sustainability-Report.pdf',
   },
   'cpcb-arai-vehicular-emissions-2020': {
     id: 'cpcb-arai-vehicular-emissions-2020',
     title: 'CPCB & ARAI Emission Factor Database for Indian In-Use Vehicles',
-    url: 'https://cpcb.nic.in/vehicular-exhaust-emissions/',
+    url: 'https://cpcb.gov.in/source-apportioment-studies/Emission_Factors_Vehicles.pdf',
   },
   'ashrae-62-2-residential': {
     id: 'ashrae-62-2-residential',
@@ -41,13 +41,13 @@ export const RECOMMENDATION_SOURCES: Readonly<
   },
   'cdc-niosh-n95-fit': {
     id: 'cdc-niosh-n95-fit',
-    title: 'CDC/NIOSH Respirator Fit Capability and Performance Evaluation',
-    url: 'https://www.cdc.gov/niosh/npptl/topics/respirators/disp_part/default.html',
+    title: 'CDC/NIOSH Approved Filtering Facepiece Respirators Reference',
+    url: 'https://www.cdc.gov/niosh/ppe/niosh-approved-respirators/ffr-cel.html',
   },
   'cpcb-naqi-2014': {
     id: 'cpcb-naqi-2014',
     title: 'CPCB National Air Quality Index Guidelines',
-    url: 'https://cpcb.nic.in/National-Air-Quality-Index/',
+    url: 'https://cpcb.gov.in/National-Air-Quality-Index/',
   },
   'epa-indoor-pm-penetration': {
     id: 'epa-indoor-pm-penetration',

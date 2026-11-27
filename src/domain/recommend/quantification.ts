@@ -49,6 +49,13 @@ export function calculateEmissionsSaved(
   return toInteger(deltaFactor * roundTripDistance);
 }
 
+/** Action identifier for indoor incense and candle elimination. */
+export const INCENSE_ACTION_ID = 'act-indoor-no-incense-candles';
+
+/** Explicit modeling assumption attached when incense elimination is evaluated. */
+export const INCENSE_COMBUSTION_ASSUMPTION =
+  'Assumes regular prior indoor incense or candle combustion; steady-state ambient mass balance includes no indoor emission term.';
+
 /** Assembles verifiable explanation provenance for an intervention recommendation. */
 export function buildExplanation(
   action: Action,
@@ -63,13 +70,17 @@ export function buildExplanation(
   const allSourceIds = Array.from(
     new Set([...action.sourceIds, ...defaultSources])
   );
+  const assumptions =
+    action.id === INCENSE_ACTION_ID
+      ? [...STANDARD_EXPOSURE_ASSUMPTIONS, INCENSE_COMBUSTION_ASSUMPTION]
+      : [...STANDARD_EXPOSURE_ASSUMPTIONS];
 
   return {
     formulaId,
     inputs,
     result: doseReductionUg,
     unit: 'ug',
-    assumptions: STANDARD_EXPOSURE_ASSUMPTIONS,
+    assumptions,
     sourceIds: allSourceIds,
   };
 }

@@ -35,12 +35,12 @@ export const EXPOSURE_SOURCES: Readonly<Record<string, SourceReference>> = {
     id: SOURCE_THATCHER,
     title:
       'Thatcher & Layton: Deposition, Resuspension, and Penetration of Particles within a Residence',
-    url: 'https://doi.org/10.1016/1352-2310(94)00253-A',
+    url: 'https://doi.org/10.1016/1352-2310(95)00016-R',
   },
   [SOURCE_NIOSH_FIT]: {
     id: SOURCE_NIOSH_FIT,
-    title: 'CDC/NIOSH Respirator Fit Capability and Performance Evaluation',
-    url: 'https://www.cdc.gov/niosh/npptl/topics/respirators/disp_part/default.html',
+    title: 'CDC/NIOSH Approved Filtering Facepiece Respirators Reference',
+    url: 'https://www.cdc.gov/niosh/ppe/niosh-approved-respirators/ffr-cel.html',
   },
   [SOURCE_CDC_MASK]: {
     id: SOURCE_CDC_MASK,
@@ -50,13 +50,13 @@ export const EXPOSURE_SOURCES: Readonly<Record<string, SourceReference>> = {
   [SOURCE_CLOTH_MASK]: {
     id: SOURCE_CLOTH_MASK,
     title:
-      'EPA Research on Cloth Masks and Filtration Efficiencies for Ambient Particulates',
-    url: 'https://www.epa.gov/air-research/research-air-filtration-and-masks',
+      'US EPA Research: Evaluating the Effectiveness of Facial Coverings and Masks',
+    url: 'https://www.epa.gov/emergency-response-research/evaluating-effectiveness-facial-coverings-and-masks',
   },
   [SOURCE_EPA_EXPOSURE]: {
     id: SOURCE_EPA_EXPOSURE,
     title: 'EPA Exposure Factors Handbook Chapter 6: Inhalation Rates',
-    url: 'https://www.epa.gov/expobox/about-exposure-factors-handbook',
+    url: 'https://www.epa.gov/expobox/exposure-factors-handbook-chapter-6',
   },
 };
 

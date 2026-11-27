@@ -107,7 +107,7 @@ export const INDOOR_ACTIONS: readonly Action[] = [
     category: CAT_INDOOR,
     title: 'Eliminate indoor incense and candle burning',
     description:
-      'Avoid lighting agarbatti, dhoop, and paraffin candles in indoor spaces to eliminate a dominant domestic source of carbon soot and volatile organic compounds.',
+      'Avoid lighting agarbatti, dhoop, and paraffin candles indoors to eliminate domestic carbon soot and VOC peaks. Estimate assumes prior regular indoor incense or candle burning, as the steady-state ambient balance model has no indoor source term.',
     costRupees: 0,
     effort: 1,
     effects: [
@@ -118,6 +118,6 @@ export const INDOOR_ACTIONS: readonly Action[] = [
       },
     ],
     sourceIds: [SOURCE_IITK, SOURCE_WHO],
-    confidence: CONF_HIGH,
+    confidence: 'low',
   },
 ];

@@ -31,7 +31,10 @@ function interpolateValue(
   if (prev !== undefined && next !== undefined) {
     const span = next.hour - prev.hour;
     if (span <= 0) {
-      return { pm25: prev.pm25, pm10: prev.pm10 };
+      return {
+        pm25: Math.max(0, toInteger(prev.pm25)),
+        pm10: Math.max(0, toInteger(prev.pm10)),
+      };
     }
     const ratio = (target - prev.hour) / span;
     const pm25 = Math.max(
@@ -46,11 +49,17 @@ function interpolateValue(
   }
 
   if (prev !== undefined) {
-    return { pm25: Math.max(0, prev.pm25), pm10: Math.max(0, prev.pm10) };
+    return {
+      pm25: Math.max(0, toInteger(prev.pm25)),
+      pm10: Math.max(0, toInteger(prev.pm10)),
+    };
   }
 
   if (next !== undefined) {
-    return { pm25: Math.max(0, next.pm25), pm10: Math.max(0, next.pm10) };
+    return {
+      pm25: Math.max(0, toInteger(next.pm25)),
+      pm10: Math.max(0, toInteger(next.pm10)),
+    };
   }
 
   return { pm25: 0, pm10: 0 };
@@ -98,7 +107,11 @@ export function interpolateHourlySeries(
   for (let hour = 0; hour < 24; hour += 1) {
     const existing = readingsByHour.get(hour);
     if (existing !== undefined) {
-      completeSeries.push(existing);
+      completeSeries.push({
+        hour: existing.hour,
+        pm25: Math.max(0, toInteger(existing.pm25)),
+        pm10: Math.max(0, toInteger(existing.pm10)),
+      });
       continue;
     }
     const { prevHour, nextHour } = findSurroundingHours(knownHours, hour);
