@@ -31,10 +31,7 @@ export function ConfidenceMeter({
   const label = CONFIDENCE_LABELS[level];
 
   return (
-    <div
-      className="flex flex-col gap-1 text-xs text-slate-700 dark:text-slate-300"
-      aria-label={label}
-    >
+    <div className="flex flex-col gap-1 text-xs text-slate-700 dark:text-slate-300">
       <div className="flex items-center gap-[6px]">
         <span className="font-medium text-slate-800 dark:text-slate-200">
           Confidence:
@@ -60,7 +57,7 @@ export function ConfidenceMeter({
         <span className="capitalize">{level}</span>
       </div>
       {explanation ? (
-        <p className="text-[11px] text-slate-600 dark:text-slate-400">
+        <p className="text-[11px] text-slate-700 dark:text-slate-300">
           {explanation}
         </p>
       ) : null}

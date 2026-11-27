@@ -35,12 +35,18 @@ describe('Data display UI kit components', () => {
     expect(screen.getByText('180')).toBeDefined();
     expect(screen.getByText('µg/m³')).toBeDefined();
     expect(screen.getByText('-20% today')).toBeDefined();
+    const infoIcon = screen.getByRole('img', { name: 'Test formula' });
+    expect(infoIcon.textContent?.trim()).toBe('ⓘ');
   });
 
   it('renders ConfidenceMeter with accessible progressbar attributes', () => {
-    render(<ConfidenceMeter level="high" explanation="Based on CPCB data" />);
+    const { container } = render(
+      <ConfidenceMeter level="high" explanation="Based on CPCB data" />
+    );
     const bar = screen.getByRole('progressbar');
     expect(bar.getAttribute('aria-valuenow')).toBe('3');
+    expect(bar.getAttribute('aria-label')).toBe('High scientific consensus');
+    expect(container.firstElementChild?.hasAttribute('aria-label')).toBe(false);
     expect(screen.getByText('Based on CPCB data')).toBeDefined();
   });
 

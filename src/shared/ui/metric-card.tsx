@@ -31,6 +31,7 @@ export function MetricCard({
         <h3>{label}</h3>
         {tooltip ? (
           <span
+            role="img"
             className="cursor-help text-slate-700 hover:text-slate-900 dark:text-slate-300 dark:hover:text-slate-100"
             title={tooltip}
             aria-label={tooltip}

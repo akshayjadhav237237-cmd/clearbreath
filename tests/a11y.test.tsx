@@ -21,11 +21,19 @@ const AXE_OPTIONS: axe.RunOptions = {
   },
 };
 
+function assertNoProhibitedAria(results: axe.AxeResults) {
+  expect(results.violations).toEqual([]);
+  const prohibited = results.incomplete.filter(
+    (node) => node.id === 'aria-prohibited-attr'
+  );
+  expect(prohibited).toEqual([]);
+}
+
 describe('Axe-core accessibility audit on vertical feature panels', () => {
   it('App shell has zero accessibility violations', async () => {
     const { container } = render(<App />);
     const results = await axe.run(container, AXE_OPTIONS);
-    expect(results.violations).toEqual([]);
+    assertNoProhibitedAria(results);
   });
 
   it('HouseholdPanel has zero accessibility violations', async () => {
@@ -34,10 +42,10 @@ describe('Axe-core accessibility audit on vertical feature panels', () => {
     expect(results.violations).toEqual([]);
   });
 
-  it('AirNowPanel has zero accessibility violations', async () => {
+  it('AirNowPanel has zero accessibility violations or prohibited ARIA attributes', async () => {
     const { container } = render(<AirNowPanel />);
     const results = await axe.run(container, AXE_OPTIONS);
-    expect(results.violations).toEqual([]);
+    assertNoProhibitedAria(results);
   });
 
   it('PlanPanel has zero accessibility violations', async () => {
@@ -46,16 +54,16 @@ describe('Axe-core accessibility audit on vertical feature panels', () => {
     expect(results.violations).toEqual([]);
   });
 
-  it('RecommendationsPanel has zero accessibility violations', async () => {
+  it('RecommendationsPanel has zero accessibility violations or prohibited ARIA attributes', async () => {
     const { container } = render(<RecommendationsPanel />);
     const results = await axe.run(container, AXE_OPTIONS);
-    expect(results.violations).toEqual([]);
+    assertNoProhibitedAria(results);
   });
 
-  it('ComparePanel has zero accessibility violations', async () => {
+  it('ComparePanel has zero accessibility violations or prohibited ARIA attributes', async () => {
     const { container } = render(<ComparePanel />);
     const results = await axe.run(container, AXE_OPTIONS);
-    expect(results.violations).toEqual([]);
+    assertNoProhibitedAria(results);
   });
 
   it('AssistantPanel has zero accessibility violations', async () => {

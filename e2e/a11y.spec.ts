@@ -15,6 +15,10 @@ const WCAG_TAGS = [
 async function runAxe(page: Page) {
   const results = await new AxeBuilder({ page }).withTags(WCAG_TAGS).analyze();
   expect(results.violations).toEqual([]);
+  const prohibitedAria = results.incomplete.filter(
+    (node) => node.id === 'aria-prohibited-attr'
+  );
+  expect(prohibitedAria).toEqual([]);
 }
 
 test.describe('Real Chromium Axe-Core Household and Severe Audits', () => {
