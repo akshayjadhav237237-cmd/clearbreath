@@ -28,20 +28,22 @@ process.stdout.write('Bundle Budget Analysis:\n');
 for (const file of assetFiles) {
   const fullPath = path.join(assetsDir, file);
   const gzSize = getGzipSize(fullPath);
-  const gzKb = (gzSize / 1024).toFixed(2);
+  const gzKib = (gzSize / 1024).toFixed(2);
 
   if (file.endsWith('.css')) {
-    process.stdout.write(`- CSS (${file}): ${gzKb} kB (Budget: 20 kB)\n`);
+    process.stdout.write(`- CSS (${file}): ${gzKib} KiB (Budget: 20 KiB)\n`);
     if (gzSize > MAX_CSS_GZIP) {
-      process.stderr.write(`CSS ${file} exceeds 20 kB budget!\n`);
+      process.stderr.write(`CSS ${file} exceeds 20 KiB budget!\n`);
       hasError = true;
     }
   } else if (file.endsWith('.js')) {
     const isInitial = file.startsWith('index-');
     const budget = isInitial ? MAX_INITIAL_JS_GZIP : MAX_LAZY_CHUNK_GZIP;
-    const budgetLabel = isInitial ? '75 kB (Initial JS)' : '40 kB (Lazy Chunk)';
+    const budgetLabel = isInitial
+      ? '75 KiB (Initial JS)'
+      : '40 KiB (Lazy Chunk)';
     process.stdout.write(
-      `- JS (${file}): ${gzKb} kB (Budget: ${budgetLabel})\n`
+      `- JS (${file}): ${gzKib} KiB (Budget: ${budgetLabel})\n`
     );
     if (gzSize > budget) {
       process.stderr.write(`JS ${file} exceeds ${budgetLabel} budget!\n`);
