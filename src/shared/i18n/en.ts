@@ -34,6 +34,8 @@ export const EN_TRANSLATIONS: AppTranslations = {
     low: 'Low',
     medium: 'Medium',
     high: 'High',
+    estimateNote:
+      'Modelled estimate under stated assumptions; actual exposure varies with real-world ventilation and emission sources.',
   },
   household: {
     title: 'Household Profile',

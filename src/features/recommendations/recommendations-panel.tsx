@@ -42,8 +42,8 @@ function RecommendationsHeader({
         {title}
       </h2>
       <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
-        Prioritized by empirical cost-effectiveness (inhaled dose reduction per
-        rupee spent).
+        Prioritized by estimated cost-effectiveness (modelled inhaled dose
+        reduction per rupee spent).
       </p>
       <div className="mt-4 grid grid-cols-2 gap-4">
         <MetricCard
@@ -176,6 +176,7 @@ export function RecommendationsPanel(): JSX.Element {
             item={item}
             isDone={completedActionIds.includes(item.action.id)}
             onToggle={toggleActionCompleted}
+            estimateNote={t.common.estimateNote}
           />
         ))}
       </ul>

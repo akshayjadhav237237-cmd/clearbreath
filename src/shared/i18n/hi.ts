@@ -34,6 +34,8 @@ export const HI_TRANSLATIONS: AppTranslations = {
     low: 'कम',
     medium: 'मध्यम',
     high: 'उच्च',
+    estimateNote:
+      'निर्दिष्ट मान्यताओं के अंतर्गत मॉडल किया गया अनुमान; वास्तविक जोखिम वेंटिलेशन और उत्सर्जन स्रोतों के अनुसार बदल सकता है।',
   },
   household: {
     title: 'परिवार एवं आवास विवरण',

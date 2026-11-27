@@ -64,6 +64,46 @@ function calculateTotals(
   };
 }
 
+interface HeaderProps {
+  readonly title: string;
+  readonly doseSavedPct: number;
+  readonly activeCount: number;
+  readonly estimateNote: string;
+}
+
+function CompareHeader({
+  title,
+  doseSavedPct,
+  activeCount,
+  estimateNote,
+}: HeaderProps): JSX.Element {
+  return (
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <h2
+        id="compare-heading"
+        className="text-xl font-bold text-slate-900 dark:text-slate-50"
+      >
+        {title}
+      </h2>
+      <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
+        Compare modelled status quo and mitigated household exposure estimates
+        under stated IAQ assumptions.
+      </p>
+      <div className="mt-4 flex items-center gap-3">
+        <Badge severity="good" size="md">
+          -{doseSavedPct}% Total Inhaled Dose
+        </Badge>
+        <span className="text-xs text-slate-700 dark:text-slate-300">
+          Based on {activeCount} actions implemented
+        </span>
+      </div>
+      <p className="mt-2 text-xs text-slate-700 dark:text-slate-300">
+        {estimateNote}
+      </p>
+    </div>
+  );
+}
+
 /** Side-by-side comparative impact modeling evaluating baseline vs mitigated scenario outcomes. */
 export function ComparePanel(): JSX.Element {
   const { profile, hourlySeries, completedActionIds, language } = useAppStore(
@@ -112,26 +152,12 @@ export function ComparePanel(): JSX.Element {
 
   return (
     <section aria-labelledby="compare-heading" className="space-y-6">
-      <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <h2
-          id="compare-heading"
-          className="text-xl font-bold text-slate-900 dark:text-slate-50"
-        >
-          {t.compare.title}
-        </h2>
-        <p className="mt-1 text-xs text-slate-700 dark:text-slate-300">
-          Evaluate physical mass-balance outcomes comparing status quo against
-          implemented actions.
-        </p>
-        <div className="mt-4 flex items-center gap-3">
-          <Badge severity="good" size="md">
-            -{doseSavedPct}% Total Inhaled Dose
-          </Badge>
-          <span className="text-xs text-slate-700 dark:text-slate-300">
-            Based on {activeCount} actions implemented
-          </span>
-        </div>
-      </div>
+      <CompareHeader
+        title={t.compare.title}
+        doseSavedPct={doseSavedPct}
+        activeCount={activeCount}
+        estimateNote={t.common.estimateNote}
+      />
 
       <div className="grid gap-6 md:grid-cols-2">
         <BaselineScenarioCard

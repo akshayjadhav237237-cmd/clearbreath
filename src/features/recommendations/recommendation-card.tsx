@@ -1,4 +1,5 @@
 import type { JSX } from 'react';
+import type { Explanation } from '../../domain/contracts';
 import { getActionCatalog } from '../../domain/actions';
 import { Badge, ConfidenceMeter } from '../../shared/ui';
 
@@ -8,12 +9,22 @@ export interface RecItem {
   readonly dailyDoseReductionUg: number;
   readonly doseReductionBasisPoints: number;
   readonly co2eSavedGramsPerDay: number;
+  readonly explanation?: Explanation;
 }
 
 interface ItemCardProps {
   readonly item: RecItem;
   readonly isDone: boolean;
   readonly onToggle: (actionId: string) => void;
+  readonly estimateNote?: string;
+}
+
+function formatExplanationText(
+  estimateNote: string,
+  explanation?: Explanation
+): string {
+  if (!explanation) return estimateNote;
+  return `${estimateNote} (${explanation.formulaId}; sources: ${explanation.sourceIds.join(', ')}; assumptions: ${explanation.assumptions.join('; ')})`;
 }
 
 /** Card sub-component presenting action benefits, costs, and implementation toggle. */
@@ -21,8 +32,10 @@ export function RecommendationItemCard({
   item,
   isDone,
   onToggle,
+  estimateNote = 'Modelled estimate under stated assumptions.',
 }: ItemCardProps): JSX.Element {
   const { action, dailyDoseReductionUg } = item;
+  const explanationText = formatExplanationText(estimateNote, item.explanation);
   return (
     <li
       className={`rounded-2xl border p-5 shadow-sm transition-all ${
@@ -47,7 +60,10 @@ export function RecommendationItemCard({
             {action.description}
           </p>
           <div className="pt-2">
-            <ConfidenceMeter level={action.confidence} />
+            <ConfidenceMeter
+              level={action.confidence}
+              explanation={explanationText}
+            />
           </div>
         </div>
 

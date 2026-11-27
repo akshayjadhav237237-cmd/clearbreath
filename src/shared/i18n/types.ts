@@ -35,6 +35,7 @@ export interface AppTranslations {
     readonly low: string;
     readonly medium: string;
     readonly high: string;
+    readonly estimateNote: string;
   };
   readonly household: {
     readonly title: string;
