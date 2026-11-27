@@ -36,11 +36,13 @@ graph TD
   G --> H[7 Feature Panels: AirNow, Household, Plan, Actions, Compare, Assistant, Community]
 ```
 
-India CPCB NAQI breakpoints and advisories execute in the browser from static domain tables, while Open-Meteo supplies hourly PM2.5 and PM10 readings (with deterministic `SampleProvider` fallback on fetch error). Live `gemini-3.8-flash` API calls against Google's endpoint remain unverified without a live API key; `LocalProvider` handles deterministic responses when consent or key is absent.
+India CPCB NAQI breakpoints and advisories execute in the browser from static domain tables, while Open-Meteo supplies hourly PM2.5 and PM10 readings (with deterministic `SampleProvider` fallback on fetch error). **Gemini live call not verified** (`GEMINI_API_KEY` not present during audit; only static request-builder and mocked `FetchPort` provider tests ran); `LocalProvider` handles deterministic responses when consent or an in-memory key is absent.
+
+Modelled mitigation action reductions (`Actions`) and scenario comparisons (`Compare`) display visible UI wording `"estimate under stated assumptions"` in both English and Hindi (alongside `formulaId`, `sourceIds`, and `assumptions` metadata on action cards and `"estimated cost-effectiveness"` wording). See [docs/ASSUMPTIONS.md](docs/ASSUMPTIONS.md) for model parameters and documented domain/UI simplifications.
 
 ## Data Egress & Allowlist Disclosure
 
-Cloud AI is optional and domain calculations run in the browser; outbound browser requests go only to Open-Meteo and Gemini (Open-Meteo gets the selected city's coordinates; Gemini gets only the allowlisted fields, only after consent and key).
+Cloud AI is optional and domain calculations run in the browser; outbound browser requests target only Open-Meteo (receiving static 2-decimal-place coordinates for the selected city on load or change) and Gemini (receiving only the allowlisted fields below, only after explicit consent and an in-memory API key).
 
 <!-- privacy:start -->
 
@@ -50,28 +52,30 @@ Cloud AI is optional and domain calculations run in the browser; outbound browse
 | `aqiCategory`      | Directs severity and urgency of outdoor activity advisories.                   | `severe`                                |
 | `aqiValue`         | Provides ambient diurnal particulate index.                                    | `430`                                   |
 | `sensitivityLevel` | Calibrates vulnerability threshold for elder and child guidance.               | `high`                                  |
-| `ageGroupsPresent` | Ensures tailored protective guidance without exposing member identities.       | `["child", "older"]`                    |
+| `ageGroupsPresent` | Shapes protective guidance by age cohort without exposing member identities.   | `["child", "older"]`                    |
 | `homeType`         | Informs dwelling infiltration estimates.                                       | `apartment`                             |
 | `sealing`          | Determines building envelope air exchange rate.                                | `average`                               |
 | `cookingFuel`      | Evaluates indoor combustion particulate sources.                               | `png`                                   |
 | `commuteMode`      | Identifies transit exposure and carbon mitigation opportunities.               | `metro`                                 |
-| `budgetBand`       | Filters viable intervention actions without revealing financial details.       | `medium`                                |
+| `budgetBand`       | Filters viable intervention actions without revealing exact rupee figures.     | `medium`                                |
 | `language`         | Instructs response language preference.                                        | `en`                                    |
-| `facts`            | Supplies verified mathematical and catalog evidence to prevent hallucinations. | `[{ id: "act-indoor-seal-gaps", ... }]` |
+| `facts`            | Supplies calculated mathematical and catalog evidence to ground output claims. | `[{ id: "act-indoor-seal-gaps", ... }]` |
 | `question`         | Transmits sanitized question text only when user submits a query.              | `Should we run the purifier tonight?`   |
 
 <!-- privacy:end -->
 
 ## Quality & Verification Matrix
 
-| Criterion                | Implementation & Measured Outcome                                                                                          | Verified Artifacts                                        |
-| :----------------------- | :------------------------------------------------------------------------------------------------------------------------- | :-------------------------------------------------------- |
-| **Code Quality**         | 200 lines/file max, 60 lines/fn (`.ts`) / 90 lines/fn (`.tsx`), 0 `any`, 0 `!`, 0 clones (`110` files analyzed)            | `npm run check`, `npm run dup`                            |
-| **Problem Alignment**    | CPCB NAQI breakpoints, ASHRAE/EPA mass-balance infiltration, EPA dose calculations                                         | `src/domain/`, `src/features/`                            |
-| **Egress & Headers**     | Allowlist egress, strict CSP & `6/6` Vercel HTTP headers, memory-only API key isolation                                    | `e2e/privacy.spec.ts`, `tests/ai/privacy/privacy.test.ts` |
-| **Efficiency**           | Initial JS `70.48 KiB` gzip (`72.18 kB` SI) vs `75 KiB` budget; CSS `5.41 KiB` (`5.54 kB` SI) vs `20 KiB`; browser engines | `scripts/check-bundle.mjs`                                |
-| **Testing**              | `61` test files (`338` unit tests passing), `18` Chromium E2E specs across `4` files; `94.47%` stmts / `92.43%` branches   | `npm run check`, `npm run e2e`                            |
-| **Accessibility & Live** | `0` axe-core violations across `10` states / `33` live scans (`2026-11-26 UTC`); Mobile Lighthouse `100 / 100 / 100 / 100` | `e2e/a11y.spec.ts`, `docs/VERIFICATION.md`                |
+| Criterion                 | Implementation & Measured Outcome                                                                                                                                                                                                                 | Verified Artifacts                                        |
+| :------------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------------------------------------- |
+| **Code Quality**          | 200 lines/file max, 60 lines/fn (`.ts`) / 90 lines/fn (`.tsx`), 0 `any`, 0 `!`, 0 clones (`110` files analyzed)                                                                                                                                   | `npm run check`, `npm run dup`                            |
+| **Problem Alignment**     | CPCB NAQI breakpoints, ASHRAE/EPA mass-balance infiltration, EPA dose calculations, visible `"estimate under stated assumptions"` UI notes                                                                                                        | `src/domain/`, `src/features/`, `docs/ASSUMPTIONS.md`     |
+| **Egress & Headers**      | Allowlist egress, strict CSP & `6/6` Vercel HTTP headers (`2026-11-26 UTC`), memory-only API key isolation                                                                                                                                        | `e2e/privacy.spec.ts`, `tests/ai/privacy/privacy.test.ts` |
+| **Efficiency & Bundles**  | Initial JS `70.64 KiB` gzip vs `75 KiB` budget; lazy chunks `1.20–9.25 KiB` vs `40 KiB`; CSS `5.41 KiB` vs `20 KiB` (`a9ddf94`); browser domain engines                                                                                           | `scripts/check-bundle.mjs`                                |
+| **Testing & Coverage**    | `61` test files (`339` unit tests passing), `18` Chromium E2E specs across `4` files; CI (`a9ddf94`) coverage: `98.53%` stmts / `92.63%` branches (`8e71232` clean clone: `98.54%` stmts)                                                         | `npm run check`, `npm run e2e`, `docs/VERIFICATION.md`    |
+| **Accessibility**         | `0` axe-core violations & `0` `aria-prohibited-attr` incomplete nodes (`a9ddf94`: `18` Chromium E2E specs + `12` live Vercel scans; resolves `29` defects from the `33`-scan `b3f8066` audit)                                                     | `e2e/a11y.spec.ts`, `docs/VERIFICATION.md`                |
+| **Live Lighthouse**       | Mobile (`2026-11-26 UTC`, pre-Phase-B): `100 / 100 / 100 / 100` across `3` sequential runs (`80–220 ms` TTFB); earlier cold-TTFB run `84 / 100 / 100 / 100` (`1,230 ms` TTFB, Agentic `100`); Performance varies with server response time (TTFB) | `docs/VERIFICATION.md`                                    |
+| **Dependency Advisories** | `19` `npm audit` advisories (`1` prod high `zod <4.6.6` pinned `3.25.76`; `18` dev: `3` critical, `1` high, `14` moderate); `0` same-major patch fixes exist under pinned majors                                                                  | `package.json`, `docs/VERIFICATION.md`                    |
 
 ## Commands
 
