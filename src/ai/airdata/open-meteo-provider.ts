@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod/mini';
 import type { HourlyReading } from '../../domain/contracts';
 import { toInteger } from '../../domain/units';
 import type { Clock, FetchPort } from '../../shared/ports';
@@ -11,11 +11,11 @@ import { getCityById } from '../../config/cities';
 import type { AirDataError, AirDataProvider, HourlySeries } from '../contracts';
 
 const openMeteoSchema = z.object({
-  utc_offset_seconds: z.number().default(19800),
+  utc_offset_seconds: z.prefault(z.number(), 19800),
   hourly: z.object({
     time: z.array(z.string()),
-    pm2_5: z.array(z.number().nullable()),
-    pm10: z.array(z.number().nullable()),
+    pm2_5: z.array(z.nullable(z.number())),
+    pm10: z.array(z.nullable(z.number())),
   }),
 });
 

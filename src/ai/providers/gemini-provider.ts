@@ -1,4 +1,4 @@
-import type { ZodType } from 'zod';
+import type { ZodMiniType } from 'zod/mini';
 import type { FetchPort } from '../../shared/ports';
 import { type Result, err, ok } from '../../shared/result';
 import {
@@ -90,7 +90,7 @@ export class GeminiProvider implements AiProvider {
   private async run<T>(
     prompt: string,
     schema: Record<string, unknown>,
-    validator: ZodType<T>,
+    validator: ZodMiniType<T>,
     signal?: AbortSignal
   ): Promise<Result<T, AiError>> {
     const res = await this.callGemini(prompt, schema, signal);

@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import * as z from 'zod/mini';
 import { getCityById } from '../config/cities';
 import type { HouseholdProfile } from '../domain/contracts';
 import { householdProfileSchema } from '../domain/profile/schemas';
@@ -24,18 +24,18 @@ export interface PersistenceError {
 /** Version 1 persisted application state schema. */
 export const persistedStateV1Schema = z.object({
   version: z.literal(1),
-  profile: householdProfileSchema as unknown as z.ZodType<HouseholdProfile>,
+  profile: householdProfileSchema as unknown as z.ZodMiniType<HouseholdProfile>,
   language: z.enum(['en', 'hi']),
   completedActionIds: z
-    .array(z.string().min(1).max(80))
-    .max(200) as unknown as z.ZodType<readonly string[]>,
+    .array(z.string().check(z.minLength(1), z.maxLength(80)))
+    .check(z.maxLength(200)) as unknown as z.ZodMiniType<readonly string[]>,
   aiConsent: z.boolean(),
-  selectedCity: z
-    .string()
-    .min(1)
-    .max(60)
-    .refine((c) => getCityById(c) !== undefined, 'Invalid city selection'),
-  updatedAt: z.number().int().positive(),
+  selectedCity: z.string().check(
+    z.minLength(1),
+    z.maxLength(60),
+    z.refine((c) => getCityById(c) !== undefined, 'Invalid city selection')
+  ),
+  updatedAt: z.int().check(z.positive()),
 });
 
 /** Shape of version 1 persisted state. */
